@@ -46,6 +46,12 @@
       "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/thebasics"
     },
     {
+      "name": "tuples1",
+      "dir": "00_basics",
+      "hint": "Wrap tuple values in parentheses: (1, 2). Name elements like (x: 10, y: 20) and read them with .x and .y. Separate values with commas, not a colon.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/thebasics"
+    },
+    {
       "name": "operators1",
       "dir": "00_basics",
       "hint": "Remember: + for addition, - for subtraction, * for multiplication, / for division, % for remainder",

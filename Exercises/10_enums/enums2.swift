@@ -1,5 +1,9 @@
 // enums2.swift
 //
+// Heads up: this exercise uses a generic type parameter T (the <T> below).
+// You will learn generics in 14_generics. Here you only need to fill in the
+// associated values, so you can treat T as "some type that gets decided later".
+//
 // Enums can have associated values that store additional information.
 // This makes them powerful for modeling data with variations.
 //

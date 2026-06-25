@@ -2,6 +2,8 @@
 //
 // Converting between error types and using Result type.
 // Rethrowing functions can propagate errors from their function parameters.
+// A `rethrows` function only throws when the closure you pass it throws, so
+// the closures from 05_closures are the prerequisite here.
 //
 // Fix the error conversions and rethrowing to make the tests pass.
 

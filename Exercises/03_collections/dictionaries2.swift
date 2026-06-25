@@ -1,5 +1,9 @@
 // dictionaries2.swift
 //
+// Heads up: a dictionary subscript returns an optional, because the key might
+// not be there. You will learn more about optionals in 06_optionals. For now,
+// just follow the hints.
+//
 // Dictionary operations often involve optionals since keys might not exist.
 // Let's practice safe dictionary access and updates.
 //
