@@ -72,7 +72,7 @@ final class ProcessRunnerTests: XCTestCase {
   func testProcessRunnerSwift() throws {
     let runner = ProcessRunner()
     let result = try runner.run(
-      executable: "/usr/bin/swift",
+      executable: Configuration.Executables.swiftc,
       arguments: ["--version"],
       currentDirectory: nil
     )

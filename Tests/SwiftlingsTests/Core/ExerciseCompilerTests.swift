@@ -62,7 +62,7 @@ final class ExerciseCompilerTests: XCTestCase {
 
     XCTAssertTrue(mockRunner.capturedCalls.count == 1)
     let call = mockRunner.capturedCalls[0]
-    XCTAssertTrue(call.executable == "/usr/bin/swiftc")
+    XCTAssertTrue(call.executable == Configuration.Executables.swiftc)
     XCTAssertTrue(call.arguments == ["-o", "exercise", "main.swift", "test_exercise.swift"])
     XCTAssertTrue(call.directory?.path == "/tmp/test")
   }

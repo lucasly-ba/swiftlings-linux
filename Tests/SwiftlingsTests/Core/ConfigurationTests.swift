@@ -4,8 +4,12 @@ import Foundation
 
 final class ConfigurationTests: XCTestCase {
   func testExecutablePaths() {
-    XCTAssertTrue(Configuration.Executables.git == "/usr/bin/git")
-    XCTAssertTrue(Configuration.Executables.swiftc == "/usr/bin/swiftc")
+    // Resolved from PATH, so the directory varies by toolchain. Check that we
+    // got an absolute path to the right tool rather than a fixed location.
+    XCTAssertTrue(Configuration.Executables.git.hasPrefix("/"))
+    XCTAssertTrue(Configuration.Executables.git.hasSuffix("git"))
+    XCTAssertTrue(Configuration.Executables.swiftc.hasPrefix("/"))
+    XCTAssertTrue(Configuration.Executables.swiftc.hasSuffix("swiftc"))
   }
 
   func testFilePaths() {

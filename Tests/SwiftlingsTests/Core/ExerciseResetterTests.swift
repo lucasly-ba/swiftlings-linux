@@ -35,7 +35,7 @@ final class ExerciseResetterTests: XCTestCase {
 
     XCTAssertTrue(mockRunner.capturedCalls.count == 1)
     let call = mockRunner.capturedCalls[0]
-    XCTAssertTrue(call.executable == "/usr/bin/git")
+    XCTAssertTrue(call.executable == Configuration.Executables.git)
     XCTAssertTrue(call.arguments == ["checkout", "HEAD", "--", "Exercises/test_dir/test_exercise.swift"])
     XCTAssertTrue(call.directory == nil)
   }
