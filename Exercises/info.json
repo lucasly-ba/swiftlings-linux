@@ -118,6 +118,18 @@
       "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/stringsandcharacters"
     },
     {
+      "name": "strings3",
+      "dir": "02_strings_and_characters",
+      "hint": "You cannot subscript a String with an Int. Use text.startIndex, then text.index(_:offsetBy:) to build a String.Index, and subscript with that. For a range, make two indices and use s..<e.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/stringsandcharacters"
+    },
+    {
+      "name": "strings4",
+      "dir": "02_strings_and_characters",
+      "hint": "Use split(separator: \" \") and count for words. Loop 'for character in text' and check a Set of vowels. Use contains(...) to search and replacingOccurrences(of:with:) to replace.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/stringsandcharacters"
+    },
+    {
       "name": "arrays1",
       "dir": "03_collections",
       "hint": "Use commas between elements. Empty array: [String](). Type should be Array<Double>. Arrays start at index 0. Use .count property.",
