@@ -1,5 +1,5 @@
 {
-  description = "Swift learning environment (swiftc 5.10.1, superset of 5.9)";
+  description = "Swiftlings: learn Swift on Linux with small exercises (Swift 5.10.1)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -44,7 +44,6 @@
             binutils       # provides `ar`, `ld` (SwiftPM requires `ar`)
             clang          # C/C++ compiler used for linking & C interop
             srun           # `srun file.swift` = compile + run (Foundation-safe)
-            python3        # runs the swiftlings exercise checker
           ] ++ swiftLibs;
 
           # Make the Foundation/Dispatch shared objects discoverable at runtime.
@@ -66,21 +65,19 @@
             + "-L ${pkgs.swiftPackages.Dispatch}/lib "
             + "-L ${pkgs.swiftPackages.XCTest}/lib/swift/linux";
 
+          # Type `swiftlings` instead of `swift run swiftlings` from the repo root.
           shellHook = ''
+            alias swiftlings='swift run swiftlings'
             echo ""
-            echo "  swift learning shell"
+            echo "  Swiftlings on Linux"
             swiftc --version | head -n1 | sed 's/^/  /'
             echo ""
-            echo "  swift               start the REPL"
-            echo "  srun file.swift     compile + run one file (use this for Foundation)"
-            echo "  swiftc file.swift   compile to a binary"
-            echo "  swift run           run a SwiftPM package (cd example)"
-            echo "  swift-format ...    format your code"
+            echo "  swiftlings            start in watch mode (solve, save, repeat)"
+            echo "  swiftlings list       all exercises and your progress"
+            echo "  swiftlings hint       a hint for the current exercise"
+            echo "  swiftlings run NAME   run one exercise"
             echo ""
-            echo "  exercices:  python swiftlings.py        (watch)"
-            echo "              python swiftlings.py list    (avancement)"
-            echo "              python swiftlings.py hint    (un indice)"
-            echo "  tuto: https://swift.crea-troyes.fr/"
+            echo "  Learn Swift alongside: https://docs.swift.org/swift-book/"
             echo ""
           '';
         };
