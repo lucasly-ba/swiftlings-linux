@@ -17,7 +17,7 @@ struct DSACommand: ParsableCommand {
     
     /// Get DSA exercises grouped by category
     let dsaCategories = [
-      ("Queue", "20_dsa_queue", "FIFO data structure - First In, First Out")
+      ("Queue", "dsa_queue", "FIFO data structure - First In, First Out")
       // Future: ("Stack", "21_dsa_stack", "LIFO data structure - Last In, First Out"),
       // Future: ("Linked List", "22_dsa_linkedlist", "Linear data structure with nodes"),
       // Future: ("Binary Tree", "23_dsa_tree", "Hierarchical data structure"),
