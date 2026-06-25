@@ -44,9 +44,36 @@ le module `Foundation`. Deux façons qui marchent a tous les coups :
 L'avertissement `glibc not found ...` est cosmétique, la sortie est bonne, on
 l'ignore.
 
+## Les exercices (swiftlings)
+
+Une serie de petits exercices facon rustlings. Chaque fichier dans
+`exercises/` a un bug ou un trou a combler et une ligne `// I AM NOT DONE`.
+On corrige, on enleve le marqueur, et on passe au suivant.
+
+```sh
+python swiftlings.py            # mode watch: relance a chaque sauvegarde
+python swiftlings.py list       # ou en est-on
+python swiftlings.py run        # verifier l'exercice en cours une fois
+python swiftlings.py hint       # un indice quand on bloque
+python swiftlings.py solution   # la solution complete quand on abandonne
+python swiftlings.py doc        # la section du tuto a aller lire
+```
+
+Le principe : `watch` te montre toujours le premier exercice pas encore
+termine. Tu ouvres le fichier, tu corriges, tu sauvegardes, et le runner
+relance tout seul. Bloque ? `hint`. Vraiment bloque ? `solution`, qui
+explique aussi le pourquoi. Et `doc` t'envoie a la bonne section de
+crea-troyes.
+
+Les themes, dans l'ordre : prise en main, variables, chaines, fonctions,
+conditions et switch, tableaux, optionnels, structs, enums.
+
 ## Le contenu
 
 - `flake.nix` : la définition de l'environnement (versions figées dans `flake.lock`)
 - `.envrc` : l'intégration direnv
 - `hello.swift` : un premier exemple, `srun hello.swift`
 - `example/` : un petit paquet SwiftPM, `cd example && swift run`
+- `exercises/` : les exercices a resoudre
+- `swiftlings.py` : le runner qui verifie, donne des indices, etc.
+- `meta.json` : indices, explications et solutions des exercices

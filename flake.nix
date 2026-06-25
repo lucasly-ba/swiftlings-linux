@@ -42,6 +42,7 @@
             binutils       # provides `ar`, `ld` (SwiftPM requires `ar`)
             clang          # C/C++ compiler used for linking & C interop
             srun           # `srun file.swift` = compile + run (Foundation-safe)
+            python3        # runs the swiftlings exercise checker
           ] ++ swiftLibs;
 
           # Make the Foundation/Dispatch shared objects discoverable at runtime.
@@ -70,6 +71,10 @@
             echo "  swiftc file.swift   compile to a binary"
             echo "  swift run           run a SwiftPM package (cd example)"
             echo "  swift-format ...    format your code"
+            echo ""
+            echo "  exercices:  python swiftlings.py        (watch)"
+            echo "              python swiftlings.py list    (avancement)"
+            echo "              python swiftlings.py hint    (un indice)"
             echo "  tuto: https://swift.crea-troyes.fr/"
             echo ""
           '';
