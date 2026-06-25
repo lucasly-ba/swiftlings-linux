@@ -334,6 +334,30 @@
       "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/enumerations"
     },
     {
+      "name": "properties1",
+      "dir": "11_properties",
+      "hint": "A computed property uses braces: var area: Double { width * height }.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/properties"
+    },
+    {
+      "name": "properties2",
+      "dir": "11_properties",
+      "hint": "Add an observer: var volume: Int = 0 { didSet { volume = min(11, max(0, volume)) } }. Setting volume inside didSet does not loop.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/properties"
+    },
+    {
+      "name": "properties3",
+      "dir": "11_properties",
+      "hint": "Change var data to lazy var data. A lazy property runs its initializer only on first access.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/properties"
+    },
+    {
+      "name": "properties4",
+      "dir": "11_properties",
+      "hint": "Add static var count = 0 and static func make() -> User { count += 1; return User(id: count) }.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/properties"
+    },
+    {
       "name": "protocols1",
       "dir": "12_protocols",
       "hint": "Add property/method requirements to protocols. Conform with : Protocol. Implement all requirements. Use Describable as parameter type.",
