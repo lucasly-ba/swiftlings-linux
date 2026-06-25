@@ -160,6 +160,18 @@
       "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/collectiontypes"
     },
     {
+      "name": "collections_hof1",
+      "dir": "03_collections",
+      "hint": "numbers.map { $0 * $0 } squares each value; numbers.filter { $0 % 2 == 0 } keeps the evens.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/closures"
+    },
+    {
+      "name": "collections_hof2",
+      "dir": "03_collections",
+      "hint": "words.reduce(0) { $0 + $1.count } sums the lengths; nested.flatMap { $0 } flattens one level.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/closures"
+    },
+    {
       "name": "functions1",
       "dir": "04_functions",
       "hint": "Add -> String return type. Add parameters (a: Int, b: Int). Use parameter names inside the function body.",
