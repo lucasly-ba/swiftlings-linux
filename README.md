@@ -84,27 +84,35 @@ The exercises go from the basics to the deeper parts of the language:
 
 1. `00_basics`
 2. `01_control_flow`
-3. `02_functions`
+3. `02_strings_and_characters`
 4. `03_collections`
-5. `04_optionals`
-6. `05_structs`
-7. `06_classes`
-8. `07_enums`
-9. `08_protocols`
-10. `09_extensions`
-11. `10_generics`
-12. `11_error_handling`
-13. `12_closures`
-14. `13_memory_management`
-15. `14_property_wrappers`
-16. `15_concurrency`
-17. `16_result_builders`
-18. `17_advanced_types`
-19. `18_codable`
+5. `04_functions`
+6. `05_closures`
+7. `06_optionals`
+8. `07_structs`
+9. `08_classes`
+10. `09_initialization`
+11. `10_enums`
+12. `11_properties`
+13. `12_protocols`
+14. `13_extensions`
+15. `14_generics`
+16. `15_error_handling`
+17. `16_memory_management`
+18. `17_codable`
+19. `18_property_wrappers`
+20. `19_concurrency`
+21. `20_result_builders`
+22. `21_advanced_types`
 
-There is also a small data-structures track that builds a queue from scratch.
 Each topic folder has a `README.md` with a short explanation and links to the
 official docs.
+
+### Bonus track
+
+After the numbered topics there is `dsa_queue`, a small data-structures track
+that builds a FIFO queue from scratch, from a basic struct up to `Collection`
+conformance. It is not part of the numbered language curriculum.
 
 ## Notes on the Linux port
 
