@@ -1,0 +1,10 @@
+# direnv
+.direnv/
+
+# Swift / SwiftPM build artifacts
+.build/
+*.o
+*.swiftmodule
+
+# compiled binaries from `swiftc file.swift`
+hello
