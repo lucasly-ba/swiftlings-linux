@@ -1,47 +1,30 @@
 import Foundation
 
-class FileWatcher {
-  private var watchedPath: String
+/// Watches a single file's modification time by polling. Call `hasChanged()`
+/// from a loop; it returns true once after each time the file is saved.
+final class FileWatcher {
+  private let path: String
   private var lastModificationDate: Date?
-  private var timer: Timer?
-  private let onChange: () -> Void
 
-  init(path: String, onChange: @escaping () -> Void) {
-    self.watchedPath = path
-    self.onChange = onChange
-    self.lastModificationDate = getModificationDate()
+  init(path: String) {
+    self.path = path
+    self.lastModificationDate = FileWatcher.modificationDate(of: path)
   }
 
-  func start() {
-    timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-      self?.checkForChanges()
+  /// True if the file was saved since the last call (or since init).
+  func hasChanged() -> Bool {
+    guard let current = FileWatcher.modificationDate(of: path) else {
+      return false
     }
-  }
-
-  func stop() {
-    timer?.invalidate()
-    timer = nil
-  }
-
-  private func getModificationDate() -> Date? {
-    do {
-      let attributes = try FileManager.default.attributesOfItem(atPath: watchedPath)
-      return attributes[.modificationDate] as? Date
-    } catch {
-      return nil
+    defer { lastModificationDate = current }
+    if let last = lastModificationDate {
+      return current > last
     }
+    return false
   }
 
-  private func checkForChanges() {
-    guard let currentModDate = getModificationDate() else { return }
-
-    if let lastModDate = lastModificationDate {
-      if currentModDate > lastModDate {
-        lastModificationDate = currentModDate
-        onChange()
-      }
-    } else {
-      lastModificationDate = currentModDate
-    }
+  private static func modificationDate(of path: String) -> Date? {
+    let attributes = try? FileManager.default.attributesOfItem(atPath: path)
+    return attributes?[.modificationDate] as? Date
   }
 }

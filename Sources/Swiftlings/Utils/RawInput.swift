@@ -35,10 +35,11 @@ class RawTerminalInput {
     // (UInt on Darwin, UInt32 on Glibc); cast through tcflag_t for both.
     raw.c_lflag &= ~(tcflag_t(ICANON) | tcflag_t(ECHO))
 
-    // Set minimum characters to read - handle tuple-based c_cc on macOS
+    // VMIN 0 + VTIME 1 makes read() return after at most 100ms even with no
+    // input, so readKey() can poll without blocking the watch loop.
     withUnsafeMutableBytes(of: &raw.c_cc) { ptr in
-      ptr[Int(VMIN)] = 1
-      ptr[Int(VTIME)] = 0
+      ptr[Int(VMIN)] = 0
+      ptr[Int(VTIME)] = 1
     }
 
     tcsetattr(STDIN_FILENO, TCSANOW, &raw)
@@ -61,5 +62,14 @@ class RawTerminalInput {
     }
 
     return nil
+  }
+
+  /// Block until a key is pressed. Used for "press any key" style prompts.
+  func waitForKey() -> Character {
+    while true {
+      if let key = readKey() {
+        return key
+      }
+    }
   }
 }

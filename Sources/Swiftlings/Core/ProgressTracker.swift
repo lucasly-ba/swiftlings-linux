@@ -36,9 +36,7 @@ class ProgressTracker {
     do {
       let data = try Data(contentsOf: URL(fileURLWithPath: ".swiftlings-state.json"))
       let decoder = JSONDecoder()
-      // `.iso8601` traps (SIGILL) under swift-corelibs-foundation on Linux;
-      // epoch seconds round-trips reliably across platforms.
-      decoder.dateDecodingStrategy = .secondsSince1970
+      decoder.dateDecodingStrategy = .iso8601
       return try decoder.decode(ProgressState.self, from: data)
     } catch {
       Terminal.warning("Failed to load progress state: \(error)")
@@ -50,8 +48,7 @@ class ProgressTracker {
   private func saveState() {
     do {
       let encoder = JSONEncoder()
-      // See loadState: avoid `.iso8601`, which traps on Linux Foundation.
-      encoder.dateEncodingStrategy = .secondsSince1970
+      encoder.dateEncodingStrategy = .iso8601
       encoder.outputFormatting = .prettyPrinted
       let data = try encoder.encode(state)
       try data.write(to: URL(fileURLWithPath: stateFilePath))

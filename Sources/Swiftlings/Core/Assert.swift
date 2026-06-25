@@ -2,8 +2,10 @@ import Foundation
 
 /// Custom assertion framework for Swiftlings exercises
 public enum SwiftlingsAssert {
-  private static var testResults: [TestResult] = []
-  private static var currentTest: String = ""
+  // Exercises run as a single-threaded program, so this shared state is only
+  // ever touched from one thread. nonisolated(unsafe) says that explicitly.
+  private nonisolated(unsafe) static var testResults: [TestResult] = []
+  private nonisolated(unsafe) static var currentTest: String = ""
 
   public struct TestResult {
     let testName: String

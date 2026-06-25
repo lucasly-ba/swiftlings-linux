@@ -74,7 +74,7 @@ struct DSACommand: ParsableCommand {
       
       let tempInput = RawTerminalInput()
       tempInput.enableRawMode()
-      _ = tempInput.readKey()
+      _ = tempInput.waitForKey()
       tempInput.disableRawMode()
       
       /// Set environment variable to filter exercises in watch mode
