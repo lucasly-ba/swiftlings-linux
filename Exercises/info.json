@@ -382,6 +382,18 @@
       "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/protocols"
     },
     {
+      "name": "protocols5",
+      "dir": "12_protocols",
+      "hint": "A class must implement == and hash(into:). static func == compares x and y; hash(into:) calls hasher.combine(x) and hasher.combine(y).",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/protocols"
+    },
+    {
+      "name": "protocols6",
+      "dir": "12_protocols",
+      "hint": "Conform to Comparable and CustomStringConvertible. var description { \"\\(major).\\(minor)\" } and static func < comparing (major, minor) tuples.",
+      "doc": "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/protocols"
+    },
+    {
       "name": "extensions1",
       "dir": "13_extensions",
       "hint": "Add 'var isEven: Bool { self % 2 == 0 }'. Use components(separatedBy:). Add 'where Element == Int'. Use pow() for rounding.",
