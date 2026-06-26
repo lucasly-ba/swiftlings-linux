@@ -10,7 +10,7 @@ struct Counter {
     
     // TODO: Make this method mutating
     func increment() {
-        value += 1  // Can't modify without mutating
+        value += 1
     }
     
     // TODO: Make this method mutating
