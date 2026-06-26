@@ -18,19 +18,22 @@ enum DataError: Error {
     case missingData
 }
 
-// TODO: Create a function that converts error types
 func fetchAndParse(url: String) throws -> String {
     // Simulate network fetch
     if url.isEmpty {
         throw NetworkError.noConnection
     }
-    
+
     let data = try fetchData(from: url)
-    
-    // TODO: Handle the parsing error and convert to DataError
-    let parsed = parseData(data)  // This returns Result type
-    
-    return parsed  // Need to extract value or throw
+
+    let parsed = parseData(data)
+
+    switch parsed {
+    case .success(let value):
+        return value
+    case .failure(let error):
+        throw error
+    }
 }
 
 func fetchData(from url: String) throws -> String {
@@ -53,19 +56,12 @@ func parseData(_ data: String) -> Result<String, DataError> {
     return .success("parsed: \(data)")
 }
 
-// TODO: Create a rethrowing function
-func performOperation<T>(_ operation: () throws -> T) -> T? {  // Should be rethrowing
-    do {
-        return try operation()
-    } catch {
-        return nil  // Should rethrow, not swallow errors
-    }
+func performOperation<T>(_ operation: () throws -> T) rethrows -> T {
+    return try operation()
 }
 
-// TODO: Use Result type with map and flatMap
 func processMultipleUrls(_ urls: [String]) -> [Result<String, Error>] {
     return urls.map { url in
-        // Convert throwing function to Result
         do {
             let result = try fetchAndParse(url: url)
             return .success(result)
@@ -75,21 +71,24 @@ func processMultipleUrls(_ urls: [String]) -> [Result<String, Error>] {
     }
 }
 
-// TODO: Create custom error with associated values
 enum ValidationError: Error {
     case outOfRange(value: Int, range: ClosedRange<Int>)
     case invalidInput(String)
-    
-    // Add computed property for error description
+
     var description: String {
-        return ""  // Implement based on case
+        switch self {
+        case .outOfRange(let value, let range):
+            return "Value \(value) is out of range \(range)"
+        case .invalidInput(let input):
+            return "Invalid input: \(input)"
+        }
     }
 }
 
 func validateAge(_ age: Int) throws {
     let validRange = 0...150
     if !validRange.contains(age) {
-        // TODO: Throw appropriate error with associated values
+        throw ValidationError.outOfRange(value: age, range: validRange)
     }
 }
 
@@ -103,7 +102,7 @@ func main() {
         } catch {
             assertFalse(true, "Should not throw for valid URL")
         }
-        
+
         do {
             _ = try fetchAndParse(url: "")
             assertFalse(true, "Should throw noConnection")
@@ -113,16 +112,14 @@ func main() {
             assertFalse(true, "Wrong error type")
         }
     }
-    
+
     test("Rethrowing functions") {
-        // Test with non-throwing closure
         let result1 = performOperation { "success" }
         assertEqual(result1, "success", "Non-throwing operation")
-        
-        // Test with throwing closure
+
         do {
-            _ = try performOperation { 
-                throw NetworkError.timeout 
+            _ = try performOperation {
+                throw NetworkError.timeout
             }
             assertFalse(true, "Should rethrow error")
         } catch NetworkError.timeout {
@@ -131,22 +128,20 @@ func main() {
             assertFalse(true, "Wrong error type")
         }
     }
-    
+
     test("Result type usage") {
         let urls = ["good.com", "", "timeout", "another.com"]
         let results = processMultipleUrls(urls)
-        
+
         assertEqual(results.count, 4, "All URLs processed")
-        
-        // Check first result (success)
+
         switch results[0] {
         case .success(let value):
             assertTrue(value.contains("parsed"), "First URL succeeded")
         case .failure:
             assertFalse(true, "First URL should succeed")
         }
-        
-        // Check second result (failure)
+
         switch results[1] {
         case .success:
             assertFalse(true, "Empty URL should fail")
@@ -154,7 +149,7 @@ func main() {
             assertTrue(error is NetworkError, "Should be network error")
         }
     }
-    
+
     test("Custom error with associated values") {
         do {
             try validateAge(200)
@@ -165,10 +160,10 @@ func main() {
         } catch {
             assertFalse(true, "Wrong error type")
         }
-        
+
         let error = ValidationError.invalidInput("test")
         assertEqual(error.description, "Invalid input: test", "Error description")
     }
-    
+
     runTests()
 }
