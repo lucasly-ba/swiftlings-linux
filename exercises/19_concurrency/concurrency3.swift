@@ -106,6 +106,8 @@ actor NetworkManager {  // Should be @globalActor
 }
 
 func main() {
+    print("concurrency3: actors")
+
     test("Actor prevents data races") {
         let expectation = DispatchSemaphore(value: 0)
         let account = BankAccount()
