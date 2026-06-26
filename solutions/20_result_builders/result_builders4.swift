@@ -8,13 +8,11 @@
 @resultBuilder
 struct ConfigBuilder {
     static func buildBlock<C0, C1>(_ c0: Config<C0>, _ c1: Config<C1>) -> Config<(C0, C1)> {
-        // TODO: Combine so the result parses the dict through each child.
-        return Config { _ in (c0.parse([:]), c1.parse([:])) }
+        return Config { dict in (c0.parse(dict), c1.parse(dict)) }
     }
 
     static func buildBlock<C0, C1, C2>(_ c0: Config<C0>, _ c1: Config<C1>, _ c2: Config<C2>) -> Config<(C0, C1, C2)> {
-        // TODO: Combine three configs.
-        return Config { _ in (c0.parse([:]), c1.parse([:]), c2.parse([:])) }
+        return Config { dict in (c0.parse(dict), c1.parse(dict), c2.parse(dict)) }
     }
 }
 
@@ -42,7 +40,7 @@ func bool(_ key: String, default def: Bool = false) -> Config<Bool> {
 @resultBuilder
 struct PipelineBuilder {
     static func buildBlock(_ stages: Stage...) -> Pipeline {
-        return Pipeline(stages: [])  // Should use stages
+        return Pipeline(stages: stages)
     }
 
     static func buildExpression(_ stage: Stage) -> Stage {
@@ -62,9 +60,12 @@ struct Pipeline {
     let stages: [Stage]
 
     func execute<Input, Output>(_ input: Input) -> Output? {
-        // TODO: Run the input through every stage in order; a stage that returns
-        // nil short-circuits the pipeline. Cast the final value to Output.
-        return nil
+        var current: Any? = input
+        for stage in stages {
+            guard let value = current else { return nil }
+            current = stage.transform(value)
+        }
+        return current as? Output
     }
 }
 
@@ -86,7 +87,7 @@ func filter<T>(_ predicate: @escaping (T) -> Bool) -> Stage {
 @resultBuilder
 struct UIBuilder {
     static func buildBlock(_ views: UIView...) -> UIView {
-        return UIView(type: .container, children: [])  // Should use views
+        return UIView(type: .container, children: views)
     }
 
     static func buildExpression(_ view: UIView) -> UIView {
