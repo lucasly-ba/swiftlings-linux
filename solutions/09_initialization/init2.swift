@@ -8,10 +8,11 @@
 struct Port {
     let number: Int
 
-    // TODO: Make this a failable initializer (init?). It should return nil when
-    // `text` is not a whole number, or is outside the range 1...65535.
-    init(_ text: String) {
-        self.number = Int(text)
+    init?(_ text: String) {
+        guard let value = Int(text), (1...65535).contains(value) else {
+            return nil
+        }
+        self.number = value
     }
 }
 

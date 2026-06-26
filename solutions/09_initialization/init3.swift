@@ -13,10 +13,8 @@ class Temperature {
         self.celsius = celsius
     }
 
-    // TODO: A convenience initializer cannot set stored properties directly.
-    // It must call the designated initializer through self.init(...).
     convenience init(fahrenheit: Double) {
-        self.celsius = (fahrenheit - 32) / 1.8
+        self.init(celsius: (fahrenheit - 32) / 1.8)
     }
 }
 
