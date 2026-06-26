@@ -1,14 +1,20 @@
 import Foundation
+import Rainbow
 
 /// An interactive, full-screen exercise list (the `l` key in watch mode),
-/// modelled on the Rustlings list: navigate with the arrows or j/k, jump to the
-/// top/bottom with g/G, filter by state, search by name, reset, or jump to an
-/// exercise and continue there.
+/// modelled on the Rustlings list: a Current / State / Name / Path table you
+/// navigate with the arrows or j/k, jump around with g/G (home/end), filter by
+/// state, search by name, reset, or jump to an exercise and continue there.
 struct ExerciseListView {
   let manager: ExerciseManager
   let input: RawTerminalInput
 
   private enum Filter { case all, done, pending }
+
+  // Column widths (display columns). The Current and State cells are padded so
+  // the header lines up with the rows.
+  private let currentWidth = 9
+  private let stateWidth = 9
 
   /// Run the list until the user quits it. Returns the exercise to continue at
   /// (when they press `c`), or nil to stay on the current exercise.
@@ -18,7 +24,6 @@ struct ExerciseListView {
 
     var filter = Filter.all
     var search = ""
-    var cursor = 0
     var offset = 0
 
     func filtered() -> [Exercise] {
@@ -37,18 +42,27 @@ struct ExerciseListView {
       }
     }
 
+    // Start the cursor on the current exercise.
+    let currentName = manager.getCurrentExercise()?.name
+    var cursor = filtered().firstIndex { $0.name == currentName } ?? 0
+
     while true {
       let items = filtered()
       cursor = items.isEmpty ? 0 : min(max(0, cursor), items.count - 1)
+      let lastIndex = max(0, items.count - 1)
 
-      let currentName = manager.getCurrentExercise()?.name
-      let viewportRows = max(3, Terminal.height() - 7)
+      let viewportRows = max(3, Terminal.height() - 8)
       if cursor < offset { offset = cursor }
       if cursor >= offset + viewportRows { offset = cursor - viewportRows + 1 }
       offset = max(0, min(offset, max(0, items.count - viewportRows)))
 
       Terminal.clear()
-      print("   " + "State".bold + "    " + pad("Name", nameWidth).bold + "Path".bold)
+
+      // Header, built with the same column widths as the rows so they align.
+      print(pad("Current", currentWidth).bold
+        + pad("State", stateWidth).bold
+        + pad("Name", nameWidth).bold
+        + "Path".bold)
 
       if items.isEmpty {
         print("\n  (no exercises match)")
@@ -57,54 +71,54 @@ struct ExerciseListView {
       for index in offset..<upper {
         let exercise = items[index]
         let done = manager.isCompleted(exercise.name)
-        let marker = exercise.name == currentName ? "🦉" : "  "
-        let stateText = pad(done ? "DONE" : "PENDING", 8)
+        let isCurrent = exercise.name == currentName
+        let isCursor = index == cursor
+
+        let stateText = pad(done ? "DONE" : "PENDING", stateWidth)
         let nameText = pad(exercise.name, nameWidth)
 
-        if index == cursor {
-          // Reverse-video highlight on a plain line so it covers cleanly.
-          print("\u{001B}[7m\(marker) \(stateText)\(nameText)\(exercise.filePath)\u{001B}[0m")
+        if isCursor {
+          // Selected row: the owl in the Current column and a reverse-video
+          // highlight over a plain line so it covers cleanly.
+          let current = padDisplay("🦉", display: 2, to: currentWidth)
+          print("\u{001B}[7m\(current)\(stateText)\(nameText)\(exercise.filePath)\u{001B}[0m")
         } else {
+          let current = isCurrent
+            ? padDisplay(">>>>>>>".red, display: 7, to: currentWidth)
+            : String(repeating: " ", count: currentWidth)
           let state = done ? stateText.green : stateText.yellow
           let path = Terminal.colored(exercise.filePath, color: .cyan).underline
-          print("\(marker) \(state)\(nameText)\(path)")
+          print("\(current)\(state)\(nameText)\(path)")
         }
       }
 
       let stats = manager.getProgressStats()
       print("")
       print(ProgressBar(completed: stats.completed, total: stats.total).formattedProgress())
-
-      var footerSuffix = ""
-      switch filter {
-        case .all: break
-        case .done: footerSuffix += "  [done only]"
-        case .pending: footerSuffix += "  [pending only]"
-      }
-      if !search.isEmpty { footerSuffix += "  search: \(search)" }
-
-      print("\("↑/k".bold) \("↓/j".bold) \("g".bold)/\("G".bold) | "
-        + "\("c".bold):continue at | \("r".bold):reset | "
-        + "\("s".bold):search | \("d".bold):done \("p".bold):pending | \("q".bold):quit"
-        + footerSuffix + " ", terminator: "")
-      fflush(nil)
+      printFooter(filter: filter, search: search)
 
       let key = input.waitForKey()
 
-      // Arrow keys arrive as ESC [ A/B.
+      // Arrow / Home / End keys arrive as ESC [ ...
       if key == "\u{1B}" {
-        if input.readKeyIfAvailable() == "[", let dir = input.readKeyIfAvailable() {
-          if dir == "A" { cursor = max(0, cursor - 1) }
-          else if dir == "B" { cursor = min(max(0, items.count - 1), cursor + 1) }
+        guard input.readKeyIfAvailable() == "[", let dir = input.readKeyIfAvailable() else { continue }
+        switch dir {
+          case "A": cursor = max(0, cursor - 1)
+          case "B": cursor = min(lastIndex, cursor + 1)
+          case "H": cursor = 0; offset = 0
+          case "F": cursor = lastIndex
+          case "1", "7": cursor = 0; offset = 0; _ = input.readKeyIfAvailable()
+          case "4", "8": cursor = lastIndex; _ = input.readKeyIfAvailable()
+          default: break
         }
         continue
       }
 
       switch key {
-        case "j": cursor = min(max(0, items.count - 1), cursor + 1)
+        case "j": cursor = min(lastIndex, cursor + 1)
         case "k": cursor = max(0, cursor - 1)
         case "g": cursor = 0; offset = 0
-        case "G": cursor = max(0, items.count - 1)
+        case "G": cursor = lastIndex
         case "d": filter = (filter == .done) ? .all : .done; cursor = 0; offset = 0
         case "p": filter = (filter == .pending) ? .all : .pending; cursor = 0; offset = 0
         case "s":
@@ -123,6 +137,20 @@ struct ExerciseListView {
           break
       }
     }
+  }
+
+  private func printFooter(filter: Filter, search: String) {
+    func bracket(_ letter: String, _ rest: String, active: Bool = false) -> String {
+      let inner = "<\(letter.bold)>\(rest)"
+      return active ? inner.underline : inner
+    }
+    print("↓/j ↑/k home/g end/G | \(bracket("c", "ontinue at")) | \(bracket("r", "eset exercise"))")
+    let doneTag = bracket("d", "one", active: filter == .done)
+    let pendingTag = bracket("p", "ending", active: filter == .pending)
+    var line = "\(bracket("s", "earch")) | filter \(doneTag)/\(pendingTag) | \(bracket("q", "uit list"))"
+    if !search.isEmpty { line += "   search: \(search)" }
+    print(line + " ", terminator: "")
+    fflush(nil)
   }
 
   /// A small inline search prompt: type to filter, Backspace to edit, Enter to
@@ -148,5 +176,12 @@ struct ExerciseListView {
 
   private func pad(_ text: String, _ width: Int) -> String {
     text.count >= width ? text : text + String(repeating: " ", count: width - text.count)
+  }
+
+  /// Pad a cell whose visible content is `display` columns wide (used for the
+  /// owl emoji, which is two columns but one Character, and for already-colored
+  /// markers) out to `width` display columns.
+  private func padDisplay(_ content: String, display: Int, to width: Int) -> String {
+    content + String(repeating: " ", count: max(0, width - display))
   }
 }
