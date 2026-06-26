@@ -14,44 +14,51 @@ protocol Numeric {
 extension Int: Numeric {}
 extension Double: Numeric {}
 
-// TODO: Add extension to Array where Element conforms to Numeric
-extension Array {  // Missing where clause
+extension Array where Element: Numeric {
     func sum() -> Element {
-        // Calculate sum of numeric elements
-        return []  // Wrong return type and implementation
+        return dropFirst().reduce(first!) { $0 + $1 }
     }
-    
+
     func product() -> Element? {
-        // Calculate product, return nil if empty
-        return nil  // Implement this
+        guard let first = first else { return nil }
+        return dropFirst().reduce(first) { $0 * $1 }
     }
 }
 
-// TODO: Add nested type to String via extension
 extension String {
-    // Add enum ValidationError with cases: empty, tooShort(minimum: Int), invalid
-    
-    // Add method to validate email format
+    enum ValidationError: Error {
+        case empty
+        case tooShort(minimum: Int)
+        case invalid
+    }
+
     func validateEmail() throws {
-        // Throw appropriate ValidationError
-        // Basic check: not empty, contains @, has . after @
+        if isEmpty {
+            throw ValidationError.empty
+        }
+        guard let atIndex = firstIndex(of: "@") else {
+            throw ValidationError.invalid
+        }
+        let afterAt = self[index(after: atIndex)...]
+        guard afterAt.contains(".") else {
+            throw ValidationError.invalid
+        }
     }
 }
 
-// TODO: Create protocol with extension providing default implementation
 protocol Resettable {
     mutating func reset()
 }
 
-// TODO: Add default implementation
 extension Resettable {
-    // Provide default reset that does nothing
+    mutating func reset() {
+        // Default implementation does nothing.
+    }
 }
 
 struct Counter: Resettable {
     var value = 0
-    
-    // TODO: Should we implement reset? Check if default works
+
     mutating func reset() {
         value = 0
     }
@@ -59,22 +66,19 @@ struct Counter: Resettable {
 
 struct Configuration: Resettable {
     var settings: [String: Any] = ["theme": "dark"]
-    
-    // Use custom implementation
+
     mutating func reset() {
         settings = [:]
     }
 }
 
-// TODO: Add static methods to protocols via extension
 protocol Identifiable {
     var id: String { get }
 }
 
 extension Identifiable {
-    // Add static method to generate random ID
     static func randomID() -> String {
-        return ""  // Should return something like "ID-12345"
+        return "ID-\(Int.random(in: 10000...99999))"
     }
 }
 
@@ -84,12 +88,12 @@ func main() {
     test("Constrained array extensions") {
         assertEqual([1, 2, 3, 4, 5].sum(), 15, "Sum of integers")
         assertEqual([1.5, 2.5, 3.0].sum(), 7.0, "Sum of doubles")
-        
+
         assertEqual([2, 3, 4].product(), 24, "Product of integers")
         assertEqual([1.5, 2.0].product(), 3.0, "Product of doubles")
         assertNil([Int]().product(), "Empty array product is nil")
     }
-    
+
     test("Nested types in extensions") {
         do {
             try "test@example.com".validateEmail()
@@ -97,7 +101,7 @@ func main() {
         } catch {
             assertFalse(true, "Valid email should not throw")
         }
-        
+
         do {
             try "".validateEmail()
             assertFalse(true, "Empty email should throw")
@@ -106,7 +110,7 @@ func main() {
         } catch {
             assertFalse(true, "Wrong error type")
         }
-        
+
         do {
             try "notanemail".validateEmail()
             assertFalse(true, "Invalid email should throw")
@@ -116,27 +120,27 @@ func main() {
             assertFalse(true, "Wrong error type")
         }
     }
-    
+
     test("Protocol extension defaults") {
         var counter = Counter()
         counter.value = 10
         counter.reset()
         assertEqual(counter.value, 0, "Counter resets to 0")
-        
+
         var config = Configuration()
         config.reset()
         assertTrue(config.settings.isEmpty, "Config resets to empty")
     }
-    
+
     test("Static methods in protocol extensions") {
         struct User: Identifiable {
             let id: String
         }
-        
+
         let randomID = User.randomID()
         assertTrue(randomID.hasPrefix("ID-"), "Random ID has prefix")
         assertTrue(randomID.count > 3, "Random ID has content")
     }
-    
+
     runTests()
 }
