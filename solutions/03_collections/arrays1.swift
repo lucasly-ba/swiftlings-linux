@@ -6,30 +6,27 @@
 // Fix the array declarations and operations to make the tests pass.
 
 func createArrays() -> ([Int], [String], [Double]) {
-    // TODO: Fix array literal syntax
-    let numbers = [1 2 3 4 5]
-    
-    // TODO: Create an empty array of Strings
-    let words: String = []
-    
-    // TODO: Fix the array type annotation
-    let prices: Array<Int> = [9.99, 19.99, 29.99]
-    
+    let numbers = [1, 2, 3, 4, 5]
+
+    let words: [String] = []
+
+    let prices: [Double] = [9.99, 19.99, 29.99]
+
     return (numbers, words, prices)
 }
 
 func arrayOperations() -> (first: Int, count: Int, sum: Int) {
     let numbers = [10, 20, 30, 40, 50]
-    
-    // TODO: Access the first element (fix the index)
-    let first = numbers[1]
-    
-    // TODO: Get the count of elements (use the right property)
-    let count = numbers.length
-    
-    // TODO: Add up every element with a loop.
-    let sum = 0
-    
+
+    let first = numbers[0]
+
+    let count = numbers.count
+
+    var sum = 0
+    for number in numbers {
+        sum += number
+    }
+
     return (first, count, sum)
 }
 
@@ -43,13 +40,13 @@ func main() {
         assertEqual(words, [], "Words should be empty array")
         assertEqual(prices, [9.99, 19.99, 29.99], "Prices should be doubles")
     }
-    
+
     test("Array operations") {
         let result = arrayOperations()
         assertEqual(result.first, 10, "First element should be 10")
         assertEqual(result.count, 5, "Array has 5 elements")
         assertEqual(result.sum, 150, "Sum should be 150")
     }
-    
+
     runTests()
 }

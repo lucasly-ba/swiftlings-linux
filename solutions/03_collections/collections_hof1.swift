@@ -9,11 +9,9 @@
 // Fix the transformations to make the tests pass.
 
 func transformNumbers(_ numbers: [Int]) -> (squares: [Int], evens: [Int]) {
-    // TODO: Use map to square every number (n * n).
-    let squares = numbers
+    let squares = numbers.map { $0 * $0 }
 
-    // TODO: Use filter to keep only the even numbers (n % 2 == 0).
-    let evens = numbers
+    let evens = numbers.filter { $0 % 2 == 0 }
 
     return (squares, evens)
 }
