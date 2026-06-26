@@ -27,8 +27,8 @@ func arrayOperations() -> (first: Int, count: Int, sum: Int) {
     // TODO: Get the count of elements (use the right property)
     let count = numbers.length
     
-    // TODO: Calculate sum using a loop
-    let sum = 0  // This should be 'var' and you need to add the loop
+    // TODO: Add up every element with a loop.
+    let sum = 0
     
     return (first, count, sum)
 }
