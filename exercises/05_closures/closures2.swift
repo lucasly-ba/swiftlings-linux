@@ -80,6 +80,8 @@ func performAsyncOperation<T>(
 }
 
 func main() {
+    debugLog("ready", condition: true)
+
     test("Escaping closures") {
         let manager = AsyncManager()
         var results: [String] = []

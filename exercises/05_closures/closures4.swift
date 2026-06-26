@@ -82,6 +82,8 @@ func buildArray<T>(@ArrayBuilder<T> _ builder: () -> [T]) -> [T] {
 }
 
 func main() {
+    print(buildHTML { builder in builder.text("hello") })
+
     test("HTML DSL") {
         let html = buildHTML { builder in
             builder.tag("div") {
