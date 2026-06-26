@@ -7,91 +7,98 @@
 
 import Foundation
 
-// TODO: Create an AsyncSequence
-struct Counter {  // Should conform to AsyncSequence
+struct Counter: AsyncSequence {
+    typealias Element = Int
     let limit: Int
-    
-    // TODO: Add makeAsyncIterator
+
+    func makeAsyncIterator() -> CounterIterator {
+        return CounterIterator(limit: limit)
+    }
 }
 
 struct CounterIterator: AsyncIteratorProtocol {
     let limit: Int
     var current = 0
-    
+
     mutating func next() async -> Int? {
-        // TODO: Implement async iteration
-        return nil
+        guard current < limit else { return nil }
+        let value = current
+        current += 1
+        return value
     }
 }
 
-// TODO: Create async stream
 func numberStream() -> AsyncStream<Int> {
-    // Create stream that emits numbers
     return AsyncStream { continuation in
-        // TODO: Emit values
+        for number in 1...10 {
+            continuation.yield(number)
+        }
+        continuation.finish()
     }
 }
 
-// TODO: Make type Sendable
-struct Message {  // Should be Sendable
+struct Message: Sendable {
     let id: Int
     let text: String
-    var callback: (() -> Void)?  // This prevents Sendable
+    var callback: (@Sendable () -> Void)?
 }
 
-// TODO: Use @Sendable closure
-func processAsync(completion: @escaping () -> Void) {  // Should be @Sendable
+func processAsync(completion: @escaping @Sendable () -> Void) {
     Task {
         try? await Task.sleep(nanoseconds: 100_000_000)
         completion()
     }
 }
 
-// TODO: Create AsyncSequence with transformation
-extension AsyncSequence {
-    func square() -> AsyncMapSequence<Self, Int> {  // Wrong return type
-        // Square each element
-        return self.map { _ in 0 }  // Wrong implementation
+extension AsyncSequence where Element == Int {
+    func square() -> AsyncMapSequence<Self, Int> {
+        return self.map { $0 * $0 }
     }
 }
 
-// TODO: Handle async sequence errors
+enum StreamError: Error {
+    case failed
+}
+
 struct DataStream: AsyncSequence {
     typealias Element = String
-    
+
     struct AsyncIterator: AsyncIteratorProtocol {
         var count = 0
-        
+
         mutating func next() async throws -> String? {
             count += 1
             if count > 3 {
                 return nil
             }
             if count == 2 {
-                // TODO: Throw error for testing
+                throw StreamError.failed
             }
             try? await Task.sleep(nanoseconds: 50_000_000)
             return "Data \(count)"
         }
     }
-    
+
     func makeAsyncIterator() -> AsyncIterator {
         return AsyncIterator()
     }
 }
 
-// TODO: Create actor-isolated async sequence
 actor DataProvider {
-    private var values: [Int] = []
-    
+    private var storedValues: [Int] = []
+
     func addValue(_ value: Int) {
-        values.append(value)
+        storedValues.append(value)
     }
-    
-    // TODO: Provide async sequence of values
+
     func values() -> AsyncStream<Int> {
-        // Return stream of current values
-        return AsyncStream { _ in }
+        let snapshot = storedValues
+        return AsyncStream { continuation in
+            for value in snapshot {
+                continuation.yield(value)
+            }
+            continuation.finish()
+        }
     }
 }
 
@@ -101,24 +108,24 @@ func main() {
     test("Custom AsyncSequence") {
         let expectation = DispatchSemaphore(value: 0)
         var collected: [Int] = []
-        
+
         Task {
             let counter = Counter(limit: 5)
             for await value in counter {
                 collected.append(value)
             }
-            
+
             assertEqual(collected, [0, 1, 2, 3, 4], "Should iterate to limit")
             expectation.signal()
         }
-        
+
         expectation.wait()
     }
-    
+
     test("AsyncStream creation") {
         let expectation = DispatchSemaphore(value: 0)
         var received: [Int] = []
-        
+
         Task {
             let stream = numberStream()
             for await number in stream {
@@ -127,47 +134,46 @@ func main() {
                     break
                 }
             }
-            
+
             assertEqual(received, [1, 2, 3], "Should receive streamed values")
             expectation.signal()
         }
-        
+
         expectation.wait()
     }
-    
+
     test("Sendable conformance") {
         let message = Message(id: 1, text: "Hello", callback: nil)
-        
+
         Task {
-            // This should compile if Message is properly Sendable
             await processMessage(message)
         }
-        
+
         assertTrue(true, "Sendable type can cross concurrency boundaries")
     }
-    
+
     test("AsyncSequence transformation") {
         let expectation = DispatchSemaphore(value: 0)
         var squared: [Int] = []
-        
+
         Task {
             let numbers = Counter(limit: 4)
             for await value in numbers.square() {
                 squared.append(value)
             }
-            
+
             assertEqual(squared, [0, 1, 4, 9], "Values should be squared")
             expectation.signal()
         }
-        
+
         expectation.wait()
     }
-    
+
     test("AsyncSequence error handling") {
         let expectation = DispatchSemaphore(value: 0)
         var collected: [String] = []
         var errorOccurred = false
-        
+
         Task {
             let stream = DataStream()
             do {
@@ -177,38 +183,36 @@ func main() {
             } catch {
                 errorOccurred = true
             }
-            
+
             assertEqual(collected, ["Data 1"], "Should collect until error")
             assertTrue(errorOccurred, "Should catch error")
             expectation.signal()
         }
-        
+
         expectation.wait()
     }
-    
+
     test("Actor-isolated AsyncSequence") {
         let expectation = DispatchSemaphore(value: 0)
         let provider = DataProvider()
-        
+
         Task {
-            // Add values
             await provider.addValue(10)
             await provider.addValue(20)
             await provider.addValue(30)
-            
-            // Stream values
+
             var streamed: [Int] = []
             for await value in await provider.values() {
                 streamed.append(value)
             }
-            
+
             assertEqual(streamed, [10, 20, 30], "Should stream actor values")
             expectation.signal()
         }
-        
+
         expectation.wait()
     }
-    
+
     runTests()
 }
 
@@ -220,5 +224,4 @@ func processMessage(_ message: Message) async {
 struct SendableMessage: Sendable {
     let id: Int
     let text: String
-    // No non-Sendable stored properties
 }
