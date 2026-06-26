@@ -10,14 +10,12 @@
 
 /// Sum the lengths of all the words.
 func totalLength(of words: [String]) -> Int {
-    // TODO: Use reduce, starting at 0, adding word.count for every word.
-    return 0
+    return words.reduce(0) { $0 + $1.count }
 }
 
 /// Flatten a list of lists into a single list.
 func flatten(_ nested: [[Int]]) -> [Int] {
-    // TODO: Use flatMap to join the inner arrays into one array.
-    return []
+    return nested.flatMap { $0 }
 }
 
 func test() {
