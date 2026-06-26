@@ -83,6 +83,8 @@ func getUserSync(id: Int) throws -> String {
 }
 
 func main() {
+    print("error: \(AppError.networkUnavailable.errorDescription ?? "?")")
+
     test("LocalizedError implementation") {
         let error1 = AppError.networkUnavailable
         assertEqual(error1.errorDescription, "Network connection is unavailable", 
