@@ -156,6 +156,8 @@ func hstack(alignment: Alignment = .left, @LayoutBuilder _ content: () -> Layout
 }
 
 func main() {
+    print("result_builders3")
+
     test("Menu builder with sections") {
         let menu = Menu {
             section("Appetizers") {

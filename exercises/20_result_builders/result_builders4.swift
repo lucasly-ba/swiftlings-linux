@@ -221,6 +221,8 @@ extension UIView {
 }
 
 func main() {
+    print("result_builders4")
+
     test("Type-safe configuration builder") {
         let config = Configuration {
             string("name", default: "Unknown")
