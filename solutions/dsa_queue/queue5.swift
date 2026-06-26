@@ -8,90 +8,88 @@
 
 import Foundation
 
-// TODO: Make Queue work with any type, not just Int.
+struct Queue<Element> {
+    var elements: [Element] = []
 
-struct Queue {
-    var elements: [Int] = []
-
-    mutating func enqueue(_ element: Int) {
+    mutating func enqueue(_ element: Element) {
         elements.append(element)
     }
 
-    mutating func dequeue() -> Int? {
+    mutating func dequeue() -> Element? {
         guard !elements.isEmpty else { return nil }
         return elements.removeFirst()
     }
 
-    func peek() -> Int? {
+    func peek() -> Element? {
         return elements.first
     }
-    
+
     var isEmpty: Bool {
         return elements.isEmpty
     }
-    
+
     var count: Int {
         return elements.count
     }
 }
 
 func main() {
-    var demo = Queue<String>()
-    demo.enqueue("a")
-    demo.enqueue("b")
-    print("front \(demo.peek() ?? "?"), count \(demo.count)")
+    var queue = Queue<String>()
+    queue.enqueue("a")
+    queue.enqueue("b")
+    print("front \(queue.peek() ?? "?"), count \(queue.count)")
 
     test("Generic Queue with Int") {
         var intQueue = Queue<Int>()
         intQueue.enqueue(42)
         intQueue.enqueue(99)
-        
+
         assertEqual(intQueue.dequeue(), 42,
                    "Int queue should work correctly")
         assertEqual(intQueue.peek(), 99,
                    "Peek should return 99")
     }
-    
+
     test("Generic Queue with String") {
         var stringQueue = Queue<String>()
         stringQueue.enqueue("Hello")
         stringQueue.enqueue("World")
-        
+
         assertEqual(stringQueue.dequeue(), "Hello",
                    "String queue should dequeue 'Hello'")
         assertEqual(stringQueue.count, 1,
                    "Should have 1 element left")
     }
-    
+
     test("Generic Queue with Double") {
         var doubleQueue = Queue<Double>()
         doubleQueue.enqueue(3.14)
         doubleQueue.enqueue(2.71)
-        
+
         assertEqual(doubleQueue.peek(), 3.14,
                    "Double queue peek should return 3.14")
         assertEqual(doubleQueue.isEmpty, false,
                    "Queue should not be empty")
     }
-    
+
     test("Generic Queue with custom struct") {
         struct Person: Equatable {
             let name: String
             let age: Int
         }
-        
+
         var personQueue = Queue<Person>()
         let alice = Person(name: "Alice", age: 30)
         let bob = Person(name: "Bob", age: 25)
-        
+
         personQueue.enqueue(alice)
         personQueue.enqueue(bob)
-        
+
         assertEqual(personQueue.dequeue(), alice,
                    "Should dequeue Alice first")
         assertEqual(personQueue.peek(), bob,
                    "Bob should be at the front now")
     }
-    
+
     runTests()
 }
