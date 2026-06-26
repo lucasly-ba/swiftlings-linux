@@ -28,22 +28,18 @@ struct ProgressBar {
     filledWidth = min(filledWidth, width)
     let emptyWidth = width - filledWidth
 
-    var bar = "["
+    var bar = "[".dim
 
     if filledWidth > 0 {
-      bar += String(repeating: "#", count: filledWidth - 1)
-      if filledWidth < width {
-        bar += ">"
-      } else {
-        bar += "#"
-      }
+      let fill = String(repeating: "#", count: filledWidth - 1) + (filledWidth < width ? ">" : "#")
+      bar += fill.green
     }
 
     if emptyWidth > 0 {
-      bar += String(repeating: "-", count: emptyWidth)
+      bar += String(repeating: "-", count: emptyWidth).dim
     }
 
-    bar += "]"
+    bar += "]".dim
 
     return bar
   }
@@ -57,7 +53,7 @@ struct ProgressBar {
     let fixed = 10 + 2 + counts.count + 1
     let fitWidth = max(10, Terminal.width() - fixed)
     let bar = ProgressBar(completed: completed, total: total, width: fitWidth).render()
-    return "Progress: \(bar)\(counts)"
+    return "Progress: \(bar)\(counts.green.bold)"
   }
 }
 
