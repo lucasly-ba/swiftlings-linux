@@ -19,26 +19,19 @@ final class Atomic<Value> {
     }
 
     var wrappedValue: Value {
-        get {
-            // TODO: Make thread-safe (lock around the read)
-            return value
-        }
-        set {
-            // TODO: Make thread-safe (lock around the write)
-            value = newValue
-        }
+        get { lock.lock(); defer { lock.unlock() }; return value }
+        set { lock.lock(); defer { lock.unlock() }; value = newValue }
     }
 
     var projectedValue: Atomic<Value> { self }
 
     func mutate(_ transform: (inout Value) -> Void) {
-        // TODO: Lock for the whole read-modify-write so concurrent increments
-        // do not lose updates.
+        lock.lock()
+        defer { lock.unlock() }
         transform(&value)
     }
 }
 
-// A Clamped wrapper (the same one from property_wrappers1).
 @propertyWrapper
 struct Clamped {
     private var value: Int
@@ -72,14 +65,16 @@ struct CopyOnWrite<Value> {
     var wrappedValue: Value {
         get { box.value }
         set {
-            // TODO: If the box is uniquely referenced, mutate in place and set
-            // lastWriteCopied = false. Otherwise make a fresh Box (a copy) and
-            // set lastWriteCopied = true. (Use isKnownUniquelyReferenced(&box).)
-            box.value = newValue
+            if isKnownUniquelyReferenced(&box) {
+                box.value = newValue
+                lastWriteCopied = false
+            } else {
+                box = Box(newValue)
+                lastWriteCopied = true
+            }
         }
     }
 
-    // projectedValue indicates whether the last write made a copy.
     var projectedValue: Bool { lastWriteCopied }
 }
 
@@ -93,10 +88,7 @@ struct Trimmed {
 
     var wrappedValue: String? {
         get { value }
-        set {
-            // TODO: Trim whitespace and newlines on set
-            value = newValue
-        }
+        set { value = newValue?.trimmingCharacters(in: .whitespacesAndNewlines) }
     }
 }
 
@@ -146,13 +138,15 @@ struct Lazy<Value> {
 
     var wrappedValue: Value {
         mutating get {
-            // TODO: Initialize on first access and cache it (only call the
-            // initializer once).
-            return initializer()
+            if let storage = storage {
+                return storage
+            }
+            let value = initializer()
+            storage = value
+            return value
         }
     }
 
-    // projectedValue indicates whether the value has been initialized.
     var projectedValue: Bool { storage != nil }
 }
 
@@ -164,6 +158,7 @@ func main() {
         let queue = DispatchQueue(label: "test", attributes: .concurrent)
         let group = DispatchGroup()
 
+        // Concurrent locked read-modify-write through the atomic wrapper.
         for _ in 0..<100 {
             group.enter()
             queue.async {
