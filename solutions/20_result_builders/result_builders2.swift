@@ -5,29 +5,22 @@
 //
 // Fix the advanced result builder features to make the tests pass.
 
-// TODO: Create a query builder
 @resultBuilder
 struct QueryBuilder {
-    static func buildBlock(_ components: QueryComponent...) -> Query {
-        return Query(components: [])  // Should combine components
+    static func buildExpression(_ component: QueryComponent) -> [QueryComponent] {
+        return [component]
     }
-    
-    static func buildExpression(_ table: String) -> QueryComponent {
-        return .from(table)
+
+    static func buildBlock(_ components: [QueryComponent]...) -> [QueryComponent] {
+        return components.flatMap { $0 }
     }
-    
-    static func buildExpression(_ component: QueryComponent) -> QueryComponent {
-        return component
+
+    static func buildOptional(_ component: [QueryComponent]?) -> [QueryComponent] {
+        return component ?? []
     }
-    
-    // TODO: Add support for optional WHERE clause
-    static func buildOptional(_ component: QueryComponent?) -> QueryComponent {
-        return component ?? .empty
-    }
-    
-    // TODO: Support limited availability
-    static func buildLimitedAvailability(_ component: QueryComponent) -> QueryComponent {
-        return component
+
+    static func buildFinalResult(_ components: [QueryComponent]) -> Query {
+        return Query(components: components)
     }
 }
 
@@ -41,10 +34,36 @@ enum QueryComponent {
 
 struct Query {
     let components: [QueryComponent]
-    
+
     func toSQL() -> String {
-        // TODO: Build SQL string from components
-        return "SELECT * FROM table"
+        var columns = "*"
+        var table = ""
+        var whereClause: String?
+        var orderByClause: String?
+
+        for component in components {
+            switch component {
+            case .select(let cols):
+                columns = cols.joined(separator: ", ")
+            case .from(let name):
+                table = name
+            case .where(let condition):
+                whereClause = condition
+            case .orderBy(let column, let ascending):
+                orderByClause = "\(column) \(ascending ? "ASC" : "DESC")"
+            case .empty:
+                break
+            }
+        }
+
+        var sql = "SELECT \(columns) FROM \(table)"
+        if let whereClause = whereClause {
+            sql += " WHERE \(whereClause)"
+        }
+        if let orderByClause = orderByClause {
+            sql += " ORDER BY \(orderByClause)"
+        }
+        return sql
     }
 }
 
@@ -65,19 +84,20 @@ func orderBy(_ column: String, ascending: Bool = true) -> QueryComponent {
     return .orderBy(column, ascending: ascending)
 }
 
-// TODO: Create a routing builder
 @resultBuilder
 struct RouteBuilder {
-    static func buildBlock(_ components: Route...) -> [Route] {
-        return components
+    static func buildExpression(_ route: Route) -> [Route] {
+        return [route]
     }
-    
-    // TODO: Support for-in loops
+
+    static func buildBlock(_ components: [Route]...) -> [Route] {
+        return components.flatMap { $0 }
+    }
+
     static func buildArray(_ components: [[Route]]) -> [Route] {
-        return []  // Should flatten
+        return components.flatMap { $0 }
     }
-    
-    // TODO: Support finalize
+
     static func buildFinalResult(_ component: [Route]) -> Router {
         return Router(routes: component)
     }
@@ -91,9 +111,11 @@ struct Route {
 
 struct Router {
     let routes: [Route]
-    
+
     func handle(method: String, path: String) -> String? {
-        // TODO: Find matching route and call handler
+        for route in routes where route.method == method && route.path == path {
+            return route.handler()
+        }
         return nil
     }
 }
@@ -106,20 +128,18 @@ func post(_ path: String, handler: @escaping () -> String) -> Route {
     return Route(method: "POST", path: path, handler: handler)
 }
 
-// TODO: Create a validation builder
 @resultBuilder
 struct ValidationBuilder {
     static func buildBlock(_ components: Validator...) -> Validator {
-        return Validator { value in
-            // TODO: All validators must pass
-            return true
-        }
+        return Validator(validate: { value in
+            components.allSatisfy { $0(value) }
+        })
     }
-    
+
     static func buildExpression(_ validator: @escaping (String) -> Bool) -> Validator {
         return Validator(validate: validator)
     }
-    
+
     static func buildExpression(_ validator: Validator) -> Validator {
         return validator
     }
@@ -127,7 +147,7 @@ struct ValidationBuilder {
 
 struct Validator {
     let validate: (String) -> Bool
-    
+
     func callAsFunction(_ value: String) -> Bool {
         return validate(value)
     }
@@ -156,16 +176,16 @@ func main() {
             `where`("age > 18")
             orderBy("name")
         }
-        
+
         let sql = query.toSQL()
-        assertEqual(sql, 
+        assertEqual(sql,
                    "SELECT id, name, email FROM users WHERE age > 18 ORDER BY name ASC",
                    "Should build correct SQL")
     }
-    
+
     test("Optional query components") {
         let includeWhere = false
-        
+
         let query = buildQuery {
             select("*")
             from("products")
@@ -174,31 +194,30 @@ func main() {
             }
             orderBy("price", ascending: false)
         }
-        
+
         let sql = query.toSQL()
         assertEqual(sql,
                    "SELECT * FROM products ORDER BY price DESC",
                    "Should skip optional WHERE")
     }
-    
+
     test("Route builder") {
         let router = buildRouter {
             get("/") { "Home" }
             get("/about") { "About" }
             post("/users") { "User created" }
-            
-            // Dynamic routes
+
             for path in ["/api/v1", "/api/v2"] {
                 get(path) { "API \(path)" }
             }
         }
-        
+
         assertEqual(router.handle(method: "GET", path: "/"), "Home", "Home route")
         assertEqual(router.handle(method: "POST", path: "/users"), "User created", "POST route")
         assertEqual(router.handle(method: "GET", path: "/api/v1"), "API /api/v1", "Dynamic route")
         assertNil(router.handle(method: "GET", path: "/unknown"), "Unknown route")
     }
-    
+
     test("Validation builder") {
         let emailValidator = buildValidator {
             minLength(5)
@@ -206,13 +225,13 @@ func main() {
             contains("@")
             Validator { $0.contains(".") }  // Inline validator
         }
-        
+
         assertTrue(emailValidator("test@example.com"), "Valid email")
         assertFalse(emailValidator("test"), "Too short")
         assertFalse(emailValidator("test@com"), "Missing dot")
         assertFalse(emailValidator("a@b.c" + String(repeating: "x", count: 50)), "Too long")
     }
-    
+
     runTests()
 }
 
@@ -221,7 +240,7 @@ func buildQuery(@QueryBuilder _ builder: () -> Query) -> Query {
     return builder()
 }
 
-// Router builder implementation  
+// Router builder implementation
 func buildRouter(@RouteBuilder _ builder: () -> Router) -> Router {
     return builder()
 }
