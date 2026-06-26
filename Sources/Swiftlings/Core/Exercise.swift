@@ -23,7 +23,7 @@ struct Exercise: Codable, Equatable {
   }
 
   var filePath: String {
-    "Exercises/\(dir)/\(name).swift"
+    "exercises/\(dir)/\(name).swift"
   }
 
   private enum CodingKeys: String, CodingKey {

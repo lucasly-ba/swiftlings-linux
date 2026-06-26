@@ -6,7 +6,7 @@
 // or logic errors. The central concept behind Swiftlings is to fix these errors
 // and solve the exercises. Good luck!
 //
-// The file of this exercise is `Exercises/00_basics/intro1.swift`. Have a look!
+// The file of this exercise is `exercises/00_basics/intro1.swift`. Have a look!
 // The current exercise path will always be shown when you run an exercise.
 //
 
@@ -24,7 +24,7 @@ func main() {
     print("or logic errors. The central concept behind Swiftlings is to fix these errors")
     print("and solve the exercises. Good luck!")
     print()
-    print("The file of this exercise is `Exercises/00_basics/intro1.swift`. Have a look!")
+    print("The file of this exercise is `exercises/00_basics/intro1.swift`. Have a look!")
     print("The current exercise path will be always shown under the progress bar.")
     print("You can click on the path to open the exercise file in your editor.")
 }

@@ -15,7 +15,7 @@ final class ExerciseTests: XCTestCase {
     XCTAssertTrue(exercise.dir == "01_variables")
     XCTAssertTrue(exercise.hint == "This is a hint")
     XCTAssertTrue(exercise.dependencies == ["Foundation"])
-    XCTAssertTrue(exercise.filePath == "Exercises/01_variables/variables1.swift")
+    XCTAssertTrue(exercise.filePath == "exercises/01_variables/variables1.swift")
   }
 
   func testExerciseWithoutDependencies() {
@@ -31,9 +31,9 @@ final class ExerciseTests: XCTestCase {
 
   func testFilePathConstruction() {
     let testCases = [
-      (name: "test1", dir: "00_basics", expected: "Exercises/00_basics/test1.swift"),
-      (name: "functions1", dir: "02_functions", expected: "Exercises/02_functions/functions1.swift"),
-      (name: "complex_name", dir: "deep/nested/dir", expected: "Exercises/deep/nested/dir/complex_name.swift"),
+      (name: "test1", dir: "00_basics", expected: "exercises/00_basics/test1.swift"),
+      (name: "functions1", dir: "02_functions", expected: "exercises/02_functions/functions1.swift"),
+      (name: "complex_name", dir: "deep/nested/dir", expected: "exercises/deep/nested/dir/complex_name.swift"),
     ]
 
     for testCase in testCases {

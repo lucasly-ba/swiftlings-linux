@@ -36,7 +36,7 @@ final class ExerciseResetterTests: XCTestCase {
     XCTAssertTrue(mockRunner.capturedCalls.count == 1)
     let call = mockRunner.capturedCalls[0]
     XCTAssertTrue(call.executable == Configuration.Executables.git)
-    XCTAssertTrue(call.arguments == ["checkout", "HEAD", "--", "Exercises/test_dir/test_exercise.swift"])
+    XCTAssertTrue(call.arguments == ["checkout", "HEAD", "--", "exercises/test_dir/test_exercise.swift"])
     XCTAssertTrue(call.directory == nil)
   }
 
@@ -56,7 +56,7 @@ final class ExerciseResetterTests: XCTestCase {
       ProcessResult(
         exitCode: 1,
         stdout: "",
-        stderr: "error: pathspec 'Exercises/test_dir/failing_exercise.swift' did not match any file(s) known to git"
+        stderr: "error: pathspec 'exercises/test_dir/failing_exercise.swift' did not match any file(s) known to git"
       ),
     ]
 
@@ -84,9 +84,9 @@ final class ExerciseResetterTests: XCTestCase {
 
 
     XCTAssertTrue(mockRunner.capturedCalls.count == 3)
-    XCTAssertTrue(mockRunner.capturedCalls[0].arguments.contains("Exercises/dir1/ex1.swift"))
-    XCTAssertTrue(mockRunner.capturedCalls[1].arguments.contains("Exercises/dir2/ex2.swift"))
-    XCTAssertTrue(mockRunner.capturedCalls[2].arguments.contains("Exercises/dir3/ex3.swift"))
+    XCTAssertTrue(mockRunner.capturedCalls[0].arguments.contains("exercises/dir1/ex1.swift"))
+    XCTAssertTrue(mockRunner.capturedCalls[1].arguments.contains("exercises/dir2/ex2.swift"))
+    XCTAssertTrue(mockRunner.capturedCalls[2].arguments.contains("exercises/dir3/ex3.swift"))
   }
 
   func testResetMultipleExercisesWithFailures() throws {
@@ -128,9 +128,9 @@ final class ExerciseResetterTests: XCTestCase {
     let resetter = ExerciseResetter(processRunner: mockRunner)
 
     let testCases = [
-      (name: "simple", dir: "basics", expected: "Exercises/basics/simple.swift"),
-      (name: "complex_name", dir: "advanced/nested", expected: "Exercises/advanced/nested/complex_name.swift"),
-      (name: "test-123", dir: "00_intro", expected: "Exercises/00_intro/test-123.swift"),
+      (name: "simple", dir: "basics", expected: "exercises/basics/simple.swift"),
+      (name: "complex_name", dir: "advanced/nested", expected: "exercises/advanced/nested/complex_name.swift"),
+      (name: "test-123", dir: "00_intro", expected: "exercises/00_intro/test-123.swift"),
     ]
 
     for testCase in testCases {
