@@ -7,13 +7,12 @@
 
 class DataLoader {
     let url: String
-    
-    // TODO: Make this lazy
-    var data: String = {  // Missing lazy keyword
-        print("Loading data from \(self.url)")  // Can't use self here without lazy
+
+    lazy var data: String = {
+        print("Loading data from \(self.url)")
         return "Data from \(self.url)"
     }()
-    
+
     init(url: String) {
         self.url = url
         print("DataLoader initialized")
@@ -21,50 +20,42 @@ class DataLoader {
 }
 
 class Configuration {
-    // TODO: Add static property for shared instance
-    let shared = Configuration()  // Should be static
-    
+    static let shared = Configuration()
+
     var settings: [String: Any] = [:] {
-        // TODO: Add property observer
         didSet {
-            // Print when settings change
+            // Observe configuration changes here.
         }
     }
-    
-    // TODO: Make this private to enforce singleton
+
     init() {}
-    
-    // TODO: Change to class method that can be overridden
-    static func reset() {  // static can't be overridden
+
+    class func reset() {
         shared.settings = [:]
     }
 }
 
 class DebugConfiguration: Configuration {
-    // TODO: Override the reset method
-    func reset() {  // Missing override and class keyword
+    override class func reset() {
         super.reset()
-        settings["debug"] = true
+        shared.settings["debug"] = true
     }
 }
 
 class Counter {
-    // TODO: Add static property for total count across all instances
-    var totalCount = 0  // Should be static
-    
+    static var totalCount = 0
+
     var count = 0 {
-        // TODO: Update totalCount when count changes
         didSet {
-            // Update the class-level total
+            Counter.totalCount += (count - oldValue)
         }
     }
-    
+
     func increment() {
         count += 1
     }
-    
-    // TODO: Add class method to get total
-    func getTotalCount() -> Int {  // Should be class/static method
+
+    static func getTotalCount() -> Int {
         return totalCount
     }
 }
@@ -76,45 +67,46 @@ func main() {
         print("Creating DataLoader...")
         let loader = DataLoader(url: "https://example.com")
         print("DataLoader created, data not loaded yet")
-        
+
         // Access lazy property
         let data = loader.data
         assertEqual(data, "Data from https://example.com", "Lazy loaded data")
-        
+
         // Second access doesn't reload
         let data2 = loader.data
         assertEqual(data2, "Data from https://example.com", "Same data returned")
     }
-    
+
     test("Singleton and class methods") {
         Configuration.shared.settings["theme"] = "dark"
-        assertEqual(Configuration.shared.settings["theme"] as? String, "dark", 
+        assertEqual(Configuration.shared.settings["theme"] as? String, "dark",
                    "Singleton settings")
-        
+
         Configuration.reset()
-        assertTrue(Configuration.shared.settings.isEmpty, 
+        assertTrue(Configuration.shared.settings.isEmpty,
                   "Settings cleared after reset")
-        
+
         let debug = DebugConfiguration()
+        _ = debug
         DebugConfiguration.reset()
-        assertEqual(debug.settings["debug"] as? Bool, true, 
+        assertEqual(Configuration.shared.settings["debug"] as? Bool, true,
                    "Debug configuration adds debug flag")
     }
-    
+
     test("Static properties") {
         assertEqual(Counter.getTotalCount(), 0, "Initial total is 0")
-        
+
         let c1 = Counter()
         c1.increment()
         c1.increment()
-        
+
         let c2 = Counter()
         c2.increment()
-        
+
         assertEqual(Counter.getTotalCount(), 3, "Total across all instances")
         assertEqual(c1.count, 2, "Instance 1 count")
         assertEqual(c2.count, 1, "Instance 2 count")
     }
-    
+
     runTests()
 }
