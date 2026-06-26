@@ -11,6 +11,8 @@ Tornike Gomareli, which is a macOS-focused project. The exercises and the runner
 come from there. What this fork adds is making the whole thing build and run on
 Linux.
 
+![swiftlings-linux watch mode showing the welcome banner, progress bar, and command keys](.github/assets/screenshot.png)
+
 ## Why Swift on Linux
 
 Swift is not only for Apple platforms, and most people who reach for it on Linux
