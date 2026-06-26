@@ -147,6 +147,8 @@ func contains(_ substring: String) -> Validator {
 }
 
 func main() {
+    print("result_builders2")
+
     test("Query builder") {
         let query = Query {
             select("id", "name", "email")

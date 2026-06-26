@@ -107,6 +107,8 @@ func createViews(@ViewBuilder _ content: () -> [View]) -> [View] {
 }
 
 func main() {
+    print("result_builders1")
+
     test("Basic string builder") {
         let result = buildString {
             "Hello"
