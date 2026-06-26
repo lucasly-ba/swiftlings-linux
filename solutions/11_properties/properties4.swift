@@ -9,11 +9,12 @@
 struct User {
     let id: Int
 
-    // TODO: Add a static var `count`, starting at 0, that tracks how many
-    // users have been made.
+    static var count = 0
 
-    // TODO: Add a static method `make()` that increments count and returns a
-    // new User whose id is the new count.
+    static func make() -> User {
+        count += 1
+        return User(id: count)
+    }
 }
 
 func test() {
