@@ -8,8 +8,9 @@
 struct Percentage {
     let value: Int
 
-    // TODO: Add a custom initializer `init(value: Int)` that clamps the value
-    // into 0...100 (anything below 0 becomes 0, anything above 100 becomes 100).
+    init(value: Int) {
+        self.value = min(100, max(0, value))
+    }
 }
 
 func test() {

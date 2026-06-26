@@ -21,8 +21,10 @@ class Circle: Shape {
         super.init(name: "Circle")
     }
 
-    // TODO: Shape declares `required init(name:)`, so Circle must implement it
-    // too. Provide it, defaulting the radius to 1.0 and calling super.
+    required init(name: String) {
+        self.radius = 1.0
+        super.init(name: name)
+    }
 }
 
 func test() {
