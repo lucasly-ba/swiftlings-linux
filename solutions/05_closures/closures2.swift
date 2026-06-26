@@ -5,14 +5,15 @@
 //
 // Fix the escaping and autoclosure usage to make the tests pass.
 
+import Foundation
+
 class AsyncManager {
     private var completionHandlers: [() -> Void] = []
-    
-    // TODO: Mark closure parameter as @escaping
-    func addCompletion(_ handler: () -> Void) {
-        completionHandlers.append(handler)  // Can't store non-escaping closure
+
+    func addCompletion(_ handler: @escaping () -> Void) {
+        completionHandlers.append(handler)
     }
-    
+
     func executeAll() {
         for handler in completionHandlers {
             handler()
@@ -21,57 +22,52 @@ class AsyncManager {
     }
 }
 
-// TODO: Use @autoclosure
-func debugLog(_ message: String, condition: Bool) {  // Make message autoclosure
+func debugLog(_ message: @autoclosure () -> String, condition: Bool) {
     if condition {
-        print("DEBUG: \(message)")
+        print("DEBUG: \(message())")
     }
 }
 
-// TODO: Create function with multiple closure parameters
 func fetchData(
-    onSuccess: (String) -> Void,  // Should be @escaping
-    onFailure: (Error) -> Void    // Should be @escaping
+    onSuccess: @escaping (String) -> Void,
+    onFailure: @escaping (Error) -> Void
 ) {
-    // Simulate async work, then call back. We invoke the callbacks straight
-    // from the background queue instead of hopping to DispatchQueue.main, so
-    // this runs in a plain command-line program that has no main run loop.
+    // Call back straight from the background queue (no DispatchQueue.main hop)
+    // so this works in a command-line program with no main run loop.
     DispatchQueue.global().async {
         let success = Bool.random()
 
         if success {
-            onSuccess("Data loaded")  // Won't compile without @escaping
+            onSuccess("Data loaded")
         } else {
             onFailure(NSError(domain: "Test", code: 1))
         }
     }
 }
 
-// TODO: Fix closure capture list
 class Counter {
     var value = 0
-    
+
     func incrementAsync(completion: @escaping () -> Void) {
         DispatchQueue.global().async {
-            self.value += 1  // Strong reference cycle risk
+            self.value += 1
             completion()
         }
     }
-    
+
     func incrementAsyncSafe(completion: @escaping () -> Void) {
         DispatchQueue.global().async { [weak self] in
-            self?.value += 1  // Fixed with capture list
+            self?.value += 1
             completion()
         }
     }
 }
 
-// TODO: Use escaping closure with Result type
 typealias CompletionHandler<T> = (Result<T, Error>) -> Void
 
 func performAsyncOperation<T>(
     producing value: T,
-    completion: CompletionHandler<T>  // Should be @escaping
+    completion: @escaping CompletionHandler<T>
 ) {
     DispatchQueue.global().async {
         Thread.sleep(forTimeInterval: 0.1)
@@ -85,17 +81,17 @@ func main() {
     test("Escaping closures") {
         let manager = AsyncManager()
         var results: [String] = []
-        
+
         manager.addCompletion { results.append("First") }
         manager.addCompletion { results.append("Second") }
         manager.addCompletion { results.append("Third") }
-        
+
         assertEqual(results, [], "Handlers not executed yet")
-        
+
         manager.executeAll()
         assertEqual(results, ["First", "Second", "Third"], "All handlers executed")
     }
-    
+
     test("Autoclosure") {
         // An @autoclosure only evaluates its expression when it is actually
         // called. We count how many times the message expression is built.
@@ -108,16 +104,15 @@ func main() {
         debugLog(makeMessage("This should log"), condition: true)
         debugLog(makeMessage("This should not log"), condition: false)
 
-        // A complex expression that should not be evaluated when condition is false.
         debugLog(makeMessage("\(1 + 2 + 3 + 4 + 5)"), condition: false)
 
         assertEqual(evaluationCount, 1, "Only the logged message should be evaluated")
     }
-    
+
     test("Multiple escaping closures") {
         let expectation = DispatchSemaphore(value: 0)
         var result: String?
-        
+
         fetchData(
             onSuccess: { data in
                 result = data
@@ -128,32 +123,32 @@ func main() {
                 expectation.signal()
             }
         )
-        
+
         expectation.wait()
         assertNotNil(result, "Should have a result")
-        assertTrue(result == "Data loaded" || result!.contains("Error"), 
+        assertTrue(result == "Data loaded" || result!.contains("Error"),
                   "Valid result")
     }
-    
+
     test("Capture lists") {
         var counter: Counter? = Counter()
         let expectation = DispatchSemaphore(value: 0)
-        
+
         counter?.incrementAsyncSafe {
             expectation.signal()
         }
-        
+
         weak var weakCounter = counter
-        counter = nil  // Release strong reference
-        
+        counter = nil
+
         expectation.wait()
         assertNil(weakCounter, "Counter should be released")
     }
-    
+
     test("Generic escaping closures") {
         let expectation = DispatchSemaphore(value: 0)
         var result: Int?
-        
+
         performAsyncOperation(producing: 42) { asyncResult in
             switch asyncResult {
             case .success(let value):
@@ -163,10 +158,10 @@ func main() {
             }
             expectation.signal()
         }
-        
+
         expectation.wait()
         assertEqual(result, 42, "Async operation completed")
     }
-    
+
     runTests()
 }

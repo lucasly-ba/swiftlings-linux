@@ -5,49 +5,45 @@
 //
 // Fix the advanced closure patterns to make the tests pass.
 
-// TODO: Create a simple DSL using closures
-struct HTMLBuilder {
+import Foundation
+
+// A class (reference type) so the nested tag/text closures all append to the
+// same buffer.
+class HTMLBuilder {
     private var html = ""
-    
+
     func build() -> String {
         return html
     }
-    
-    // TODO: Add methods that take closures
+
     func tag(_ name: String, closure: () -> Void) {
         html += "<\(name)>"
-        closure()  // This won't capture nested content
+        closure()
         html += "</\(name)>"
     }
-    
+
     func text(_ content: String) {
         html += content
     }
 }
 
-// TODO: Support function builder pattern
 func buildHTML(_ builder: (HTMLBuilder) -> Void) -> String {
     let htmlBuilder = HTMLBuilder()
     builder(htmlBuilder)
     return htmlBuilder.build()
 }
 
-// TODO: Multiple trailing closures (Swift 5.3+)
 func animate(
     duration: Double,
     animations: () -> Void,
-    completion: () -> Void  // Should support trailing closure
+    completion: @escaping () -> Void
 ) {
     animations()
-    // Run the completion after a delay on a background queue (not
-    // DispatchQueue.main) so this works in a command-line program with no
-    // main run loop.
     DispatchQueue.global().asyncAfter(deadline: .now() + duration) {
         completion()
     }
 }
 
-// TODO: Create configuration DSL
 struct Configuration {
     var name: String = ""
     var value: Int = 0
@@ -58,27 +54,29 @@ func configure(_ config: inout Configuration, using closure: (inout Configuratio
     closure(&config)
 }
 
-// TODO: Implement Result builder lite
 @resultBuilder
 struct ArrayBuilder<Element> {
-    static func buildBlock(_ components: Element...) -> [Element] {
-        return []  // Wrong implementation
+    static func buildExpression(_ expression: Element) -> [Element] {
+        return [expression]
     }
-    
+
+    static func buildBlock(_ components: [Element]...) -> [Element] {
+        return components.flatMap { $0 }
+    }
+
     static func buildOptional(_ component: [Element]?) -> [Element] {
-        return []  // Handle optional
+        return component ?? []
     }
-    
+
     static func buildEither(first component: [Element]) -> [Element] {
         return component
     }
-    
+
     static func buildEither(second component: [Element]) -> [Element] {
         return component
     }
 }
 
-// TODO: Use result builder
 func buildArray<T>(@ArrayBuilder<T> _ builder: () -> [T]) -> [T] {
     return builder()
 }
@@ -97,52 +95,52 @@ func main() {
                 }
             }
         }
-        
-        assertEqual(html, "<div><h1>Hello</h1><p>World</p></div>", 
+
+        assertEqual(html, "<div><h1>Hello</h1><p>World</p></div>",
                    "Nested HTML structure")
     }
-    
+
     test("Multiple trailing closures") {
         var animationRan = false
         var completionRan = false
         let expectation = DispatchSemaphore(value: 0)
-        
+
         animate(duration: 0.1) {
             animationRan = true
         } completion: {
             completionRan = true
             expectation.signal()
         }
-        
+
         assertTrue(animationRan, "Animation closure ran")
-        
+
         expectation.wait()
         assertTrue(completionRan, "Completion closure ran")
     }
-    
+
     test("Configuration DSL") {
         var config = Configuration()
-        
+
         configure(&config) { cfg in
             cfg.name = "MyConfig"
             cfg.value = 42
             cfg.enabled = true
         }
-        
+
         assertEqual(config.name, "MyConfig", "Name configured")
         assertEqual(config.value, 42, "Value configured")
         assertTrue(config.enabled, "Enabled configured")
     }
-    
+
     test("Result builder") {
         let numbers = buildArray {
             1
             2
             3
         }
-        
+
         assertEqual(numbers, [1, 2, 3], "Build array of numbers")
-        
+
         let conditional = buildArray {
             "Hello"
             if true {
@@ -152,12 +150,11 @@ func main() {
                 "Hidden"
             }
         }
-        
+
         assertEqual(conditional, ["Hello", "World"], "Conditional building")
     }
-    
+
     test("Complex DSL usage") {
-        // Combine multiple patterns
         let result = buildHTML { html in
             html.tag("ul") {
                 let items = ["Apple", "Banana", "Cherry"]
@@ -168,10 +165,10 @@ func main() {
                 }
             }
         }
-        
+
         assertEqual(result, "<ul><li>Apple</li><li>Banana</li><li>Cherry</li></ul>",
                    "Dynamic HTML generation")
     }
-    
+
     runTests()
 }
