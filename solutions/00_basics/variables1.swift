@@ -7,10 +7,10 @@
 
 func createVariable() -> Int {
     // TODO: 'x' needs to hold 5 and still be changeable on the next line.
-    let x = 5
+    var x = 5
 
     x = x + 1
-    
+
     return x
 }
 
