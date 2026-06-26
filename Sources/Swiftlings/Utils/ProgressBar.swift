@@ -41,11 +41,18 @@ struct ProgressBar {
     return bar
   }
 
-  /// Get a formatted progress string with bar and percentage
+  /// A full progress line sized to fit the current terminal width on one line,
+  /// so the bar never wraps. The bar grows or shrinks with the window.
   func formattedProgress() -> String {
-    let bar = render()
-    let percentageStr = String(format: "%.0f%%", Double(completed) / Double(total) * 100)
-    return "Progress: \(bar) \(completed)/\(total) (\(percentageStr))"
+    let percentage = total > 0 ? Double(completed) / Double(total) * 100 : 0
+    let percentageStr = String(format: "%.0f%%", percentage)
+    let counts = " \(completed)/\(total) (\(percentageStr))"
+    // "Progress: " is 10 columns and the bar adds 2 for its brackets; leave one
+    // spare column so a full bar never tips onto a second line.
+    let fixed = 10 + 2 + counts.count + 1
+    let fitWidth = max(10, Terminal.width() - fixed)
+    let bar = ProgressBar(completed: completed, total: total, width: fitWidth).render()
+    return "Progress: \(bar)\(counts)"
   }
 }
 
@@ -86,7 +93,7 @@ struct SwiftlingsUI {
 
   private func renderProgressBar(currentExercise: Exercise) {
     let stats = manager.getProgressStats()
-    let progressBar = ProgressBar(completed: stats.completed, total: stats.total, width: Configuration.UI.progressBarWidth)
+    let progressBar = ProgressBar(completed: stats.completed, total: stats.total)
 
     print(progressBar.formattedProgress())
     print("Current exercise: \(Terminal.colored(currentExercise.filePath, color: .cyan))")

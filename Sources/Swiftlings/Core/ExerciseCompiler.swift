@@ -19,7 +19,11 @@ final class ExerciseCompiler {
     in directory: URL,
     includeAssert: Bool
   ) throws -> CompilationResult {
+    // Force colored diagnostics. swiftc turns color off when its output is not
+    // a terminal, and the runner always captures it through a pipe, so without
+    // this the compiler errors come out as plain text.
     var compileArgs = [
+      "-color-diagnostics",
       "-o", "exercise",
       "main.swift",
       "\(exercise.name).swift",

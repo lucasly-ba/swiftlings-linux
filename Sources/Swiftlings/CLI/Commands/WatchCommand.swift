@@ -39,7 +39,6 @@ struct WatchCommand: ParsableCommand {
 
     var lastResult: ExerciseResult?
     var watcher = FileWatcher(path: pathFor(currentExercise))
-    var finished = false
 
     // Compile and run the current exercise, render the result, and start
     // watching its file from this point on.
@@ -53,17 +52,12 @@ struct WatchCommand: ParsableCommand {
         let result = try runner.run()
         lastResult = result
 
+        // An exercise counts as done only once you move on from it (press `n`),
+        // so the freebie intro does not bump the progress bar before you have
+        // really started. See the `n` handler below.
         switch result {
           case .success:
-            manager.markCompleted(currentExercise)
             ui.renderWatchMode(currentExercise: currentExercise, result: result, showError: false)
-
-            if manager.getNextPendingExercise() == nil {
-              print("\n")
-              Terminal.success("🎉 All exercises completed!")
-              print(manager.finalMessage)
-              finished = true
-            }
 
           case .compilationError, .testFailure:
             ui.renderWatchMode(currentExercise: currentExercise, result: result, showError: true)
@@ -84,7 +78,7 @@ struct WatchCommand: ParsableCommand {
     // One synchronous loop: react to a save, then to a keypress. readKey()
     // returns after a short timeout, so file changes are still noticed even
     // when no key is pressed.
-    while !finished {
+    while true {
       if watcher.hasChanged() {
         runCurrentExercise()
         continue
@@ -128,14 +122,15 @@ struct WatchCommand: ParsableCommand {
 
         case "n":
           if let result = lastResult, result.isSuccess {
+            manager.markCompleted(currentExercise)
             guard let next = manager.getNextPendingExercise() else {
+              Terminal.clear()
               Terminal.success("All exercises completed! 🎉")
               print(manager.finalMessage)
               return
             }
             currentExercise = next
             manager.setCurrentExercise(next)
-            Terminal.info("Moving to next exercise...")
             runCurrentExercise()
           } else {
             Terminal.warning("Complete the current exercise first")

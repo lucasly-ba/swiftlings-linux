@@ -1,5 +1,10 @@
 import Foundation
 import Rainbow
+#if canImport(Glibc)
+  import Glibc
+#elseif canImport(Darwin)
+  import Darwin
+#endif
 
 /// Color options for terminal output
 enum TerminalColor {
@@ -36,6 +41,19 @@ enum Terminal {
   /// Clear the terminal screen
   static func clear() {
     print("\u{001B}[2J\u{001B}[H", terminator: "")
+  }
+
+  /// The terminal width in columns, so things like the progress bar can fit on
+  /// one line. Falls back to $COLUMNS, then 80, when there is no real terminal.
+  static func width() -> Int {
+    var size = winsize()
+    if ioctl(STDOUT_FILENO, UInt(TIOCGWINSZ), &size) == 0, size.ws_col > 0 {
+      return Int(size.ws_col)
+    }
+    if let columns = ProcessInfo.processInfo.environment["COLUMNS"], let value = Int(columns), value > 0 {
+      return value
+    }
+    return Configuration.UI.defaultTerminalWidth
   }
 
   /// Move cursor to specific position
