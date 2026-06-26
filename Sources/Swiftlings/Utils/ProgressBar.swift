@@ -66,20 +66,36 @@ struct SwiftlingsUI {
   /// Render the watch screen the way Rustlings does: the exercise output (or
   /// compiler error) at the top, then the "done" status, then the progress bar
   /// and current exercise path, and the key menu pinned at the bottom.
-  func renderWatchMode(currentExercise: Exercise, result: ExerciseResult? = nil, showError: Bool = false) {
+  func renderWatchMode(currentExercise: Exercise, result: ExerciseResult? = nil, showHint: Bool = false) {
     Terminal.clear()
 
     if let result = result {
       renderResult(result)
     }
 
-    if !showError, let result = result, result.isSuccess {
+    let solved = result?.isSuccess ?? false
+
+    if solved {
       renderDoneHeader(currentExercise)
+    }
+
+    if showHint {
+      renderHint(currentExercise)
     }
 
     renderProgressBar(currentExercise: currentExercise)
 
-    renderCommandsFooter()
+    renderCommandsFooter(solved: solved, showHint: showHint)
+  }
+
+  private func renderHint(_ exercise: Exercise) {
+    print("Hint".underline)
+    print(exercise.hint)
+    if let doc = exercise.doc {
+      print("")
+      print("📖 Read more: \(doc)")
+    }
+    print("")
   }
 
   private func renderDoneHeader(_ exercise: Exercise) {
@@ -134,17 +150,18 @@ struct SwiftlingsUI {
     return nil
   }
 
-  private func renderCommandsFooter() {
+  private func renderCommandsFooter(solved: Bool, showHint: Bool) {
     func key(_ k: String, _ label: String) -> String { "\(k.bold):\(label)" }
-    let menu = [
-      key("n", "next"),
-      key("h", "hint"),
+    var menu: [String] = []
+    if solved { menu.append(key("n", "next")) }
+    if !showHint { menu.append(key("h", "hint")) }
+    menu.append(contentsOf: [
       key("l", "list"),
       key("c", "check all"),
       key("x", "reset"),
       key("q", "quit"),
-    ].joined(separator: " / ")
-    print("\(menu) ? ", terminator: "")
+    ])
+    print("\(menu.joined(separator: " / ")) ? ", terminator: "")
     fflush(nil)
   }
 }

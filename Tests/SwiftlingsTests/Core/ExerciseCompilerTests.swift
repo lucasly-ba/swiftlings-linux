@@ -63,7 +63,7 @@ final class ExerciseCompilerTests: XCTestCase {
     XCTAssertTrue(mockRunner.capturedCalls.count == 1)
     let call = mockRunner.capturedCalls[0]
     XCTAssertTrue(call.executable == Configuration.Executables.swiftc)
-    XCTAssertTrue(call.arguments == ["-o", "exercise", "main.swift", "test_exercise.swift"])
+    XCTAssertTrue(call.arguments == ["-color-diagnostics", "-o", "exercise", "main.swift", "test_exercise.swift"])
     XCTAssertTrue(call.directory?.path == "/tmp/test")
   }
 
@@ -103,7 +103,7 @@ final class ExerciseCompilerTests: XCTestCase {
 
     let call = mockRunner.capturedCalls[0]
     XCTAssertTrue(call.arguments.contains("Assert.swift"))
-    XCTAssertTrue(call.arguments == ["-o", "exercise", "main.swift", "assert_test.swift", "Assert.swift"])
+    XCTAssertTrue(call.arguments == ["-color-diagnostics", "-o", "exercise", "main.swift", "assert_test.swift", "Assert.swift"])
   }
 
   func testCompilationWithoutAssertFlag() throws {

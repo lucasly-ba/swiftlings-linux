@@ -64,6 +64,20 @@ class RawTerminalInput {
     return nil
   }
 
+  /// Read a key only if one is already waiting, without blocking at all. Lets a
+  /// long running loop (like "check all") notice that the user wants to stop.
+  func readKeyIfAvailable() -> Character? {
+    let flags = fcntl(STDIN_FILENO, F_GETFL)
+    _ = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK)
+    defer { _ = fcntl(STDIN_FILENO, F_SETFL, flags) }
+
+    var buffer = [UInt8](repeating: 0, count: 1)
+    if read(STDIN_FILENO, &buffer, 1) > 0 {
+      return Character(UnicodeScalar(buffer[0]))
+    }
+    return nil
+  }
+
   /// Block until a key is pressed. Used for "press any key" style prompts.
   func waitForKey() -> Character {
     while true {

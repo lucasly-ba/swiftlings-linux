@@ -39,6 +39,7 @@ struct WatchCommand: ParsableCommand {
 
     var lastResult: ExerciseResult?
     var watcher = FileWatcher(path: pathFor(currentExercise))
+    var showHint = false
 
     // Compile and run the current exercise, render the result, and start
     // watching its file from this point on.
@@ -55,13 +56,7 @@ struct WatchCommand: ParsableCommand {
         // An exercise counts as done only once you move on from it (press `n`),
         // so the freebie intro does not bump the progress bar before you have
         // really started. See the `n` handler below.
-        switch result {
-          case .success:
-            ui.renderWatchMode(currentExercise: currentExercise, result: result, showError: false)
-
-          case .compilationError, .testFailure:
-            ui.renderWatchMode(currentExercise: currentExercise, result: result, showError: true)
-        }
+        ui.renderWatchMode(currentExercise: currentExercise, result: result, showHint: showHint)
       } catch {
         Terminal.error("Failed to run exercise: \(error)")
       }
@@ -88,14 +83,9 @@ struct WatchCommand: ParsableCommand {
 
       switch String(key).lowercased() {
         case "h":
-          Terminal.clear()
-          Terminal.info("Hint for \(currentExercise.name):")
-          print("\n\(currentExercise.hint)\n")
-          if let doc = currentExercise.doc {
-            print("📖 Read more: \(doc)\n")
-          }
-          print("Press any key to continue...")
-          _ = rawInput.waitForKey()
+          // Show the hint inline under the exercise, like Rustlings, instead of
+          // taking over the screen with a separate "press any key" page.
+          showHint = true
           runCurrentExercise()
 
         case "l":
@@ -131,6 +121,7 @@ struct WatchCommand: ParsableCommand {
             }
             currentExercise = next
             manager.setCurrentExercise(next)
+            showHint = false
             runCurrentExercise()
           } else {
             Terminal.warning("Complete the current exercise first")
@@ -140,38 +131,69 @@ struct WatchCommand: ParsableCommand {
 
         case "c":
           Terminal.clear()
-          Terminal.info("🔍 Checking all exercises...")
+          print("Checking all exercises…")
+          print("Color of exercise number: "
+            + Terminal.colored("Checking", color: .blue) + " - "
+            + Terminal.colored("Done", color: .green) + " - "
+            + Terminal.colored("Pending", color: .red))
+          print("Press any key to stop.")
           print("")
 
-          var failed = 0
-          for exercise in manager.getPendingExercises() {
-            let runner = ExerciseRunner(exercise: exercise)
-            do {
-              let result = try runner.run()
-              switch result {
-                case .success:
-                  print("✅ \(exercise.name)")
-                  manager.markCompleted(exercise)
-                case .compilationError:
-                  print("❌ \(exercise.name) - compilation error")
-                  failed += 1
-                case .testFailure:
-                  print("❌ \(exercise.name) - test failure")
-                  failed += 1
-              }
-            } catch {
-              print("❌ \(exercise.name) - error: \(error)")
-              failed += 1
+          let exercises = manager.getAllExercises()
+          let total = exercises.count
+          let numWidth = String(total).count
+          let columns = max(1, (Terminal.width() + 1) / (numWidth + 1))
+          let rows = (total + columns - 1) / columns
+
+          var done = exercises.map { manager.isCompleted($0.name) }
+          var checking: Int? = nil
+
+          // Build the grid of exercise numbers, each colored by its state.
+          func gridLines() -> [String] {
+            (0..<rows).map { row in
+              (0..<columns).compactMap { column -> String? in
+                let index = row * columns + column
+                guard index < total else { return nil }
+                let label = String(format: "%\(numWidth)d", index + 1)
+                let color: TerminalColor = index == checking ? .blue : (done[index] ? .green : .red)
+                return Terminal.colored(label, color: color)
+              }.joined(separator: " ")
             }
           }
+          func drawGrid() { gridLines().forEach { print($0) } }
+          func redrawGrid() {
+            print("\u{001B}[\(rows)A", terminator: "")
+            gridLines().forEach { print("\u{001B}[2K" + $0) }
+          }
 
-          print("\nSummary: \(failed) exercises need work")
-          print("Press any key to continue...")
+          drawGrid()
+
+          var stopped = false
+          for (index, exercise) in exercises.enumerated() {
+            if rawInput.readKeyIfAvailable() != nil {
+              stopped = true
+              break
+            }
+            if done[index] { continue }
+            checking = index
+            redrawGrid()
+            if let result = try? ExerciseRunner(exercise: exercise).run(), result.isSuccess {
+              done[index] = true
+              manager.markCompleted(exercise)
+            }
+            checking = nil
+          }
+          checking = nil
+          redrawGrid()
+
+          print("")
+          print(stopped ? "Stopped. Press any key to continue..." : "Press any key to continue...")
           _ = rawInput.waitForKey()
 
           if let newCurrent = manager.getCurrentExercise() {
             currentExercise = newCurrent
           }
+          showHint = false
           runCurrentExercise()
 
         case "x":
@@ -189,18 +211,26 @@ struct WatchCommand: ParsableCommand {
             }
             runCurrentExercise()
           } else {
-            Terminal.info("Resetting \(currentExercise.name)...")
-            do {
-              try manager.resetExercise(currentExercise)
-              Terminal.success("Exercise reset!")
-            } catch {
-              Terminal.error("Failed to reset: \(error)")
+            Terminal.clear()
+            print("Resetting will undo all your changes to the file \(currentExercise.filePath)")
+            print("Reset (y/n)? ", terminator: "")
+            fflush(nil)
+            if String(rawInput.waitForKey()).lowercased() == "y" {
+              do {
+                try manager.resetExercise(currentExercise)
+              } catch {
+                Terminal.error("Failed to reset: \(error)")
+                Thread.sleep(forTimeInterval: 1.5)
+              }
             }
-            Thread.sleep(forTimeInterval: 1)
+            showHint = false
             runCurrentExercise()
           }
 
         case "q":
+          Terminal.clear()
+          print("We hope you're enjoying learning Swift!")
+          print("If you want to continue working on the exercises at a later point, you can simply run `swiftlings` again in this directory.")
           return
 
         default:
