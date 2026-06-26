@@ -9,11 +9,7 @@ exercise links to the matching chapter of
 This is a fork of [Swiftlings](https://github.com/tornikegomareli/swiftlings) by
 Tornike Gomareli, which is a macOS-focused project. The exercises and the runner
 come from there. What this fork adds is making the whole thing build and run on
-Linux: it targets a Swift 6.x toolchain from swift.org, fixes the toolchain
-issues that showed up along the way (see [Notes on the Linux port](#notes-on-the-linux-port)),
-adds a `doc` link to the relevant Swift book chapter in every hint, ships a
-Makefile and Linux CI, and rewrites the runner's watch loop to compile cleanly
-under the Swift 6 language mode.
+Linux.
 
 ## Why Swift on Linux
 
@@ -37,7 +33,6 @@ are not writing iOS apps. Common reasons:
 ## Prerequisites
 
 - Swift 6.x, installed from [swift.org](https://www.swift.org/install/linux/)
-- git
 
 Check your toolchain:
 
@@ -115,25 +110,6 @@ official docs.
 After the numbered topics there is `dsa_queue`, a small data-structures track
 that builds a FIFO queue from scratch, from a basic struct up to `Collection`
 conformance. It is not part of the numbered language curriculum.
-
-## Notes on the Linux port
-
-The runner began as a macOS project, and a few things needed fixing to make it
-behave on Linux. These are worth writing down:
-
-- **Date encoding.** Older Linux Foundation builds crash when `JSONEncoder` uses
-  the `.iso8601` date strategy. It works on Swift 6, so the progress file uses
-  `.iso8601` again, but it is the kind of thing that silently takes down a Linux
-  build that works fine on macOS.
-- **`swift test` and `libIndexStore`.** SwiftPM loads `libIndexStore.so` to
-  assemble the test bundle. Some Linux Swift toolchains do not ship that library,
-  and then `swift test` fails before it runs a single test even though
-  `swift build` is fine. The official swift.org toolchains include it, which is
-  why the prerequisites point there.
-- **Swift 6 strict concurrency.** Moving to the Swift 6 language mode flagged the
-  watch loop, which used a background input thread and a `Timer`. It is now one
-  synchronous loop that polls the keyboard with a short timeout and compares file
-  modification times, so there is no shared mutable state to make safe.
 
 ## Credits
 
