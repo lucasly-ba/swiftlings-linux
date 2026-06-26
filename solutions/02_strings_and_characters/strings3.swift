@@ -8,22 +8,20 @@
 
 /// Return the first character of the string as a String.
 func firstCharacter(of text: String) -> String {
-    // TODO: A Swift String cannot be subscripted with an Int.
-    // Use text.startIndex to read the first character.
-    return String(text[0])
+    return String(text[text.startIndex])
 }
 
 /// Return the character at a given offset from the start, as a String.
 func character(of text: String, at offset: Int) -> String {
-    // TODO: Build a String.Index with index(_:offsetBy:) starting from startIndex.
-    let position = offset
+    let position = text.index(text.startIndex, offsetBy: offset)
     return String(text[position])
 }
 
 /// Return the substring from `start` up to (but not including) `end`.
 func slice(of text: String, from start: Int, to end: Int) -> String {
-    // TODO: Turn the integer offsets into String.Index values, then form a range.
-    return String(text[start..<end])
+    let startIndex = text.index(text.startIndex, offsetBy: start)
+    let endIndex = text.index(text.startIndex, offsetBy: end)
+    return String(text[startIndex..<endIndex])
 }
 
 func test() {
