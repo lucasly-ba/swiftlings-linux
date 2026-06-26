@@ -7,18 +7,18 @@
 
 func calculateCircleArea() -> (smallArea: Double, largeArea: Double) {
     // TODO: This value never changes. Pick the right declaration.
-    var pi = 3.14159
+    let pi = 3.14159
 
     // TODO: This value changes below. Pick the right declaration.
-    let radius = 5.0
-    
+    var radius = 5.0
+
     let smallArea = pi * radius * radius
-    
+
     // We need to change the radius for a larger circle
     radius = 10.0
-    
+
     let largeArea = pi * radius * radius
-    
+
     return (smallArea: smallArea, largeArea: largeArea)
 }
 
@@ -27,14 +27,12 @@ func main() {
     print("areas: small \(result.smallArea), large \(result.largeArea)")
 
     test("Calculate circle areas with constant pi and variable radius") {
-        // Check small circle area (radius = 5)
         let expectedSmall = 3.14159 * 5.0 * 5.0
         assertTrue(abs(result.smallArea - expectedSmall) < 0.0001, "Small circle area should be approximately \(expectedSmall)")
-        
-        // Check large circle area (radius = 10)
+
         let expectedLarge = 3.14159 * 10.0 * 10.0
         assertTrue(abs(result.largeArea - expectedLarge) < 0.0001, "Large circle area should be approximately \(expectedLarge)")
     }
-    
+
     runTests()
 }

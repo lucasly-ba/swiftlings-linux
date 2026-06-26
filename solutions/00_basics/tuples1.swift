@@ -7,23 +7,18 @@
 
 /// Build a few tuples in different styles.
 func makeTuples() -> (pair: (Int, Int), point: (x: Int, y: Int), entry: (String, Int)) {
-    // TODO: A tuple literal needs parentheses around its values
-    let pair = 1, 2
+    let pair = (1, 2)
 
-    // TODO: Give this tuple the element names x and y
-    let point = (10, 20)
+    let point = (x: 10, y: 20)
 
-    // TODO: A tuple separates its values with commas, not a colon
-    let entry = ("age": 30)
+    let entry = ("age", 30)
 
     return (pair, point, entry)
 }
 
 /// Read values back out of a named tuple.
 func describePoint(_ point: (x: Int, y: Int)) -> String {
-    // TODO: Read the elements by their names, x and y
-    // Expected for (x: 3, y: 4): "Point at 3, 4"
-    return "Point at \(point.first), \(point.second)"
+    return "Point at \(point.x), \(point.y)"
 }
 
 func test() {

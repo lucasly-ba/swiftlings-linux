@@ -1,0 +1,30 @@
+// intro1.swift
+//
+// Welcome to Swiftlings! 🦉
+//
+// This exercise compiles successfully. The remaining exercises contain compiler
+// or logic errors. The central concept behind Swiftlings is to fix these errors
+// and solve the exercises. Good luck!
+//
+// The file of this exercise is `exercises/00_basics/intro1.swift`. Have a look!
+// The current exercise path will always be shown when you run an exercise.
+//
+
+
+func main() {
+    print("       Welcome to...                      ")
+    print("   ____          _  __ _   _ _            ")
+    print("  / ___|_      _(_)/ _| |_| (_)_ __   __ _ ___ ")
+    print("  \\___ \\ \\ /\\ / / | |_| __| | | '_ \\ / _` / __|")
+    print("   ___) \\ V  V /| |  _| |_| | | | | | (_| \\__ \\")
+    print("  |____/ \\_/\\_/ |_|_|  \\__|_|_|_| |_|\\__, |___/")
+    print("                                     |___/      ")
+    print()
+    print("This exercise compiles successfully. The remaining exercises contain compiler")
+    print("or logic errors. The central concept behind Swiftlings is to fix these errors")
+    print("and solve the exercises. Good luck!")
+    print()
+    print("The file of this exercise is `exercises/00_basics/intro1.swift`. Have a look!")
+    print("The current exercise path will be always shown under the progress bar.")
+    print("You can click on the path to open the exercise file in your editor.")
+}
