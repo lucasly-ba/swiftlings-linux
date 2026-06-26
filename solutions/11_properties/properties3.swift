@@ -14,9 +14,7 @@ func expensiveValue() -> Int {
 }
 
 class Report {
-    // TODO: Make this property lazy so expensiveValue() only runs when `data`
-    // is first read, not when a Report is created. Use `lazy var`.
-    var data: Int = expensiveValue()
+    lazy var data: Int = expensiveValue()
 }
 
 func test() {

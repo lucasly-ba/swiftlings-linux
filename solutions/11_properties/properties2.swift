@@ -6,9 +6,11 @@
 // Fix the observer so volume is always kept within 0...11.
 
 struct Speaker {
-    // TODO: Add a didSet observer to `volume` that clamps it into 0...11
-    // (anything below 0 becomes 0, anything above 11 becomes 11).
-    var volume: Int = 0
+    var volume: Int = 0 {
+        didSet {
+            volume = min(11, max(0, volume))
+        }
+    }
 }
 
 func test() {
