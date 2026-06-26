@@ -9,24 +9,25 @@ import Foundation
 
 /// Count how many words are in a sentence (words are separated by single spaces).
 func wordCount(_ sentence: String) -> Int {
-    // TODO: Count the words, not every character. Words are separated by spaces.
-    return sentence.count
+    return sentence.split(separator: " ").count
 }
 
 /// Count the vowels by looking at each Character in turn.
 func vowelCount(_ text: String) -> Int {
     let vowels: Set<Character> = ["a", "e", "i", "o", "u"]
     var count = 0
-    // TODO: Iterate over the characters of `text` and add 1 for each vowel.
+    for character in text {
+        if vowels.contains(character) {
+            count += 1
+        }
+    }
     return count
 }
 
 /// Replace every "cat" with "dog", and report whether the text mentioned a cat.
 func replaceCats(in text: String) -> (result: String, mentionedCat: Bool) {
-    // TODO: hasPrefix only checks the start. We want to know if "cat" appears anywhere.
-    let mentionedCat = text.hasPrefix("cat")
-    // TODO: Replace every "cat" with "dog".
-    let result = text
+    let mentionedCat = text.contains("cat")
+    let result = text.replacingOccurrences(of: "cat", with: "dog")
     return (result, mentionedCat)
 }
 
