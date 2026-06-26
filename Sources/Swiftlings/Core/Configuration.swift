@@ -24,7 +24,7 @@ enum Configuration {
   /// File paths
   enum Paths {
     static let stateFileName = ".swiftlings-state.json"
-    static let exerciseInfoFile = "Exercises/info.json"
+    static let exerciseInfoFile = "exercises/info.json"
     static let assertSourcePath = "Sources/Swiftlings/Core/Assert.swift"
   }
 

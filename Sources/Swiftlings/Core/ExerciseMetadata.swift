@@ -19,7 +19,7 @@ struct ExerciseMetadata: Codable {
 }
 
 extension ExerciseMetadata {
-  static func load(from path: String = "Exercises/info.json") throws -> ExerciseMetadata {
+  static func load(from path: String = "exercises/info.json") throws -> ExerciseMetadata {
     let url = URL(fileURLWithPath: path)
     let data = try Data(contentsOf: url)
     let decoder = JSONDecoder()

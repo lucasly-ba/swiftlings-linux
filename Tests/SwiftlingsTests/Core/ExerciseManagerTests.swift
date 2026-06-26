@@ -67,7 +67,7 @@ final class ExerciseManagerTests: XCTestCase {
     let data = try encoder.encode(metadata)
 
 
-    let exercisesDir = tempDir.appendingPathComponent("Exercises")
+    let exercisesDir = tempDir.appendingPathComponent("exercises")
     try FileManager.default.createDirectory(at: exercisesDir, withIntermediateDirectories: true)
 
 

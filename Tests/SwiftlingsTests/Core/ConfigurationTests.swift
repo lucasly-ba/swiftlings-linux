@@ -14,7 +14,7 @@ final class ConfigurationTests: XCTestCase {
 
   func testFilePaths() {
     XCTAssertTrue(Configuration.Paths.stateFileName == ".swiftlings-state.json")
-    XCTAssertTrue(Configuration.Paths.exerciseInfoFile == "Exercises/info.json")
+    XCTAssertTrue(Configuration.Paths.exerciseInfoFile == "exercises/info.json")
     XCTAssertTrue(Configuration.Paths.assertSourcePath == "Sources/Swiftlings/Core/Assert.swift")
   }
 
@@ -60,7 +60,7 @@ final class ConfigurationTests: XCTestCase {
     XCTAssertTrue(Configuration.Paths.assertSourcePath.hasSuffix("Assert.swift"))
 
 
-    XCTAssertTrue(Configuration.Paths.exerciseInfoFile.hasPrefix("Exercises/"))
+    XCTAssertTrue(Configuration.Paths.exerciseInfoFile.hasPrefix("exercises/"))
 
 
     XCTAssertTrue(Configuration.Paths.exerciseInfoFile.hasSuffix(".json"))
