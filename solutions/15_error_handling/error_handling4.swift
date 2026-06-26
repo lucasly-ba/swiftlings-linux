@@ -7,30 +7,29 @@
 
 import Foundation
 
-// TODO: Make this conform to LocalizedError
 enum AppError: Error {
     case networkUnavailable
     case invalidCredentials
     case serverError(message: String)
     case unknown
-    
-    // Add LocalizedError properties
 }
 
-// TODO: Add a helper to Result.
-// (The standard library already gives Result `get()` and `mapError(_:)`, so the
-// useful thing to add is something it does not have.)
+// The standard library already gives Result `get()` and `mapError(_:)`, so we
+// add something it does not have: a non-throwing accessor for the value.
 extension Result {
-    // TODO: Return the success value, or nil when this is a failure.
     func valueOrNil() -> Success? {
-        return nil  // Wrong implementation
+        switch self {
+        case .success(let value):
+            return value
+        case .failure:
+            return nil
+        }
     }
 }
 
-// TODO: Handle multiple error types in one catch
 func performComplexOperation() throws {
     let random = Int.random(in: 1...4)
-    
+
     switch random {
     case 1: throw AppError.networkUnavailable
     case 2: throw AppError.invalidCredentials
@@ -43,15 +42,16 @@ func handleComplexOperation() -> String {
     do {
         try performComplexOperation()
         return "Success"
-    } catch {
-        // TODO: Handle different error types
-        return "Error"  // Should return specific messages
+    } catch AppError.networkUnavailable {
+        return "Network unavailable"
+    } catch AppError.invalidCredentials {
+        return "Invalid credentials"
+    } catch let error as NSError {
+        return "Unknown error: \(error.code)"
     }
 }
 
-// TODO: Create async throwing function pattern
 func fetchUserData(id: Int, completion: @escaping (Result<String, AppError>) -> Void) {
-    // Simulate async operation
     DispatchQueue.global().async {
         if id < 0 {
             completion(.failure(.invalidCredentials))
@@ -63,20 +63,18 @@ func fetchUserData(id: Int, completion: @escaping (Result<String, AppError>) -> 
     }
 }
 
-// TODO: Convert callback-based API to throwing
 func getUserSync(id: Int) throws -> String {
     var result: Result<String, AppError>?
     let semaphore = DispatchSemaphore(value: 0)
-    
+
     fetchUserData(id: id) { fetchResult in
         result = fetchResult
         semaphore.signal()
     }
-    
+
     semaphore.wait()
-    
-    // TODO: Extract value or throw error
-    return result!.get()  // This needs proper implementation
+
+    return try result!.get()
 }
 
 func main() {
@@ -84,18 +82,18 @@ func main() {
 
     test("LocalizedError implementation") {
         let error1 = AppError.networkUnavailable
-        assertEqual(error1.errorDescription, "Network connection is unavailable", 
+        assertEqual(error1.errorDescription, "Network connection is unavailable",
                    "Network error description")
-        
+
         let error2 = AppError.invalidCredentials
-        assertEqual(error2.errorDescription, "Invalid username or password", 
+        assertEqual(error2.errorDescription, "Invalid username or password",
                    "Credentials error description")
-        
+
         let error3 = AppError.serverError(message: "Database offline")
-        assertEqual(error3.errorDescription, "Server error: Database offline", 
+        assertEqual(error3.errorDescription, "Server error: Database offline",
                    "Server error with message")
     }
-    
+
     test("Result extensions") {
         let success: Result<Int, AppError> = .success(42)
         do {
@@ -104,7 +102,7 @@ func main() {
         } catch {
             assertFalse(true, "Should not throw for success")
         }
-        
+
         let failure: Result<Int, AppError> = .failure(.unknown)
         do {
             _ = try failure.get()
@@ -114,27 +112,24 @@ func main() {
         } catch {
             assertFalse(true, "Wrong error type")
         }
-        
-        // Our custom helper returns the value, or nil for a failure.
+
         assertEqual(success.valueOrNil(), 42, "valueOrNil returns the success value")
         assertNil(failure.valueOrNil(), "valueOrNil returns nil for a failure")
     }
-    
+
     test("Multiple error handling") {
         var results: [String] = []
-        
-        // Run many times so every random error branch is hit with overwhelming odds.
+
         for _ in 1...200 {
             results.append(handleComplexOperation())
         }
-        
-        // Should have specific error messages
+
         assertTrue(results.contains("Network unavailable"), "Should handle network error")
         assertTrue(results.contains("Invalid credentials"), "Should handle credentials error")
         assertTrue(results.contains("Unknown error: 42"), "Should handle NSError")
         assertTrue(results.contains("Success"), "Should handle success case")
     }
-    
+
     test("Async to sync conversion") {
         do {
             let user = try getUserSync(id: 1)
@@ -142,7 +137,7 @@ func main() {
         } catch {
             assertFalse(true, "Should not throw for valid ID")
         }
-        
+
         do {
             _ = try getUserSync(id: -1)
             assertFalse(true, "Should throw for negative ID")
@@ -151,7 +146,7 @@ func main() {
         } catch {
             assertFalse(true, "Wrong error type")
         }
-        
+
         do {
             _ = try getUserSync(id: 0)
             assertFalse(true, "Should throw for zero ID")
@@ -161,7 +156,7 @@ func main() {
             assertFalse(true, "Wrong error type")
         }
     }
-    
+
     runTests()
 }
 
