@@ -1,13 +1,16 @@
 # swiftlings-linux
 
-Small exercises to learn Swift on Linux, in the style of
-[Rustlings](https://github.com/rust-lang/rustlings). You fix one broken file at a
-time; the runner recompiles it on save and moves you forward when it passes. Each
-exercise links to the matching chapter of
+Small exercises to learn Swift, in the style of
+[Rustlings](https://github.com/rust-lang/rustlings), that run with the
+open-source Swift toolchain on Linux with no Mac or Xcode required. The exercises
+teach Swift the language, so the "-linux" is about the toolchain and runner, not
+Linux-specific content. You fix one broken file at a time; the runner recompiles
+it on save and moves you forward when it passes. Each exercise links to the
+matching chapter of
 [The Swift Programming Language](https://docs.swift.org/swift-book/).
 
 This is a fork of [Swiftlings](https://github.com/tornikegomareli/swiftlings) by
-Tornike Gomareli, which is a macOS-focused project. The exercises and the runner
+Tornike Gomareli, which assumes macOS and Xcode. The exercises and the runner
 come from there. What this fork adds is making the whole thing build and run on
 Linux.
 
