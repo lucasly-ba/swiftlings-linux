@@ -10,13 +10,13 @@
 /// Fix the operators to return the correct results
 func performCalculations(a: Int, b: Int) -> (sum: Int, difference: Int, product: Int, quotient: Int, remainder: Int) {
     // TODO: Fix these calculations by using the correct operators
-    let sum = a - b        // Should be a + b
-    let difference = a + b // Should be a - b
-    let product = a / b    // Should be a * b
-    let quotient = a * b   // Should be a / b
+    let sum = 0
+    let difference = 0
+    let product = 0
+    let quotient = 0
     
     // TODO: Calculate the remainder when a is divided by b
-    let remainder = 0  // Should use the modulo operator
+    let remainder = 0
     
     return (sum, difference, product, quotient, remainder)
 }
