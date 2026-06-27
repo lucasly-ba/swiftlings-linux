@@ -9,8 +9,8 @@ func findFirstMultiple(of factor: Int, startingFrom start: Int) -> Int {
     var current = start
     
     // TODO: Fix the condition - check if current is NOT divisible by factor
-    while current % factor != 0 {
-        current -= 1  // This should increment, not decrement!
+    while current < factor {
+        current += 1
     }
     
     return current
